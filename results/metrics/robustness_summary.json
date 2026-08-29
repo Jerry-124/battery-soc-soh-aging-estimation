@@ -1,0 +1,32 @@
+{
+  "initial_soc_error": {
+    "ekf": {
+      "mean_post_300s_rmse_pct": 0.8440144247855207,
+      "worst_post_300s_rmse_pct": 1.5238453894029562
+    },
+    "ukf": {
+      "mean_post_300s_rmse_pct": 0.6590884984035495,
+      "worst_post_300s_rmse_pct": 0.9686070436580729
+    }
+  },
+  "measurement_noise": {
+    "ekf": {
+      "mean_post_300s_rmse_pct": 0.992194902829016,
+      "worst_post_300s_rmse_pct": 1.4453615691115314
+    },
+    "ukf": {
+      "mean_post_300s_rmse_pct": 0.6128401248351556,
+      "worst_post_300s_rmse_pct": 0.7012499453231809
+    }
+  },
+  "parameter_uncertainty": {
+    "ekf": {
+      "mean_post_300s_rmse_pct": 3.3443432806333493,
+      "worst_post_300s_rmse_pct": 8.349603000438991
+    },
+    "ukf": {
+      "mean_post_300s_rmse_pct": 3.6309347055653776,
+      "worst_post_300s_rmse_pct": 8.94437087024956
+    }
+  }
+}

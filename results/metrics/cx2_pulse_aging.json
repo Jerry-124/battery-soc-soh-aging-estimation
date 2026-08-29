@@ -1,0 +1,31 @@
+{
+  "dataset": {
+    "publisher": "CALCE, University of Maryland",
+    "cell": "CX2-3 LiCoO2 pouch cell",
+    "source_url": "https://web.calce.umd.edu/batteries/data/CX2_3.zip",
+    "files_with_valid_cycles": 61,
+    "pulse_cycles_sampled": 1185,
+    "first_timestamp": "2010-09-17T22:40:09",
+    "last_timestamp": "2013-02-19T05:12:10"
+  },
+  "measured_health": {
+    "initial_capacity_ah": 1.385125864325351,
+    "final_capacity_ah": 0.022801667909645,
+    "final_capacity_factor": 0.016461802134314297,
+    "initial_5s_pulse_resistance_ohm": 0.1150278492889833,
+    "final_5s_pulse_resistance_ohm": 0.5752225959382803,
+    "final_resistance_factor": 5.000724602727765
+  },
+  "estimated_health": {
+    "method": "causal trailing median of 3 diagnostic checkpoints",
+    "capacity_rmse_pct": 5.568928665144077,
+    "resistance_factor_rmse": 0.27205896715219746
+  },
+  "observer_checkpoint": {
+    "timestamp": "2012-03-06T04:28:13",
+    "true_capacity_factor": 0.6945697467052774,
+    "true_resistance_factor": 1.3194107718275279,
+    "estimated_capacity_factor": 0.7055156418974343,
+    "estimated_resistance_factor": 1.3002735663950271
+  }
+}

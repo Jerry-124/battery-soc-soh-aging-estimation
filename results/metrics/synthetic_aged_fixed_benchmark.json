@@ -1,0 +1,33 @@
+{
+  "coulomb_counting": {
+    "rmse_pct": 7.318068417337037,
+    "mae_pct": 6.571638672664412,
+    "max_error_pct": 12.0,
+    "final_error_pct": -0.7794916493076121,
+    "convergence_s": 3245.0,
+    "runtime_us_per_sample": 4.615801168090755
+  },
+  "ekf": {
+    "rmse_pct": 2.392567884895021,
+    "mae_pct": 2.2739403009924786,
+    "max_error_pct": 12.0,
+    "final_error_pct": -3.2864285069574644,
+    "convergence_s": 1.0,
+    "runtime_us_per_sample": 74.97564565654926
+  },
+  "ukf": {
+    "rmse_pct": 2.3389528767540786,
+    "mae_pct": 2.2142583960699493,
+    "max_error_pct": 12.0,
+    "final_error_pct": -3.303359044527046,
+    "convergence_s": 2.0,
+    "runtime_us_per_sample": 213.47836712293167
+  },
+  "health": {
+    "capacity_soh_pct": 81.99999999999999,
+    "resistance_soh_pct": 64.51612903225806,
+    "capacity_ah": 1.8859999999999997,
+    "resistance_factor": 1.55,
+    "observer_aging_adapted": false
+  }
+}

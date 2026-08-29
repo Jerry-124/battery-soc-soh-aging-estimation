@@ -1,0 +1,20 @@
+experiment_name: synthetic_aged_fixed_benchmark
+seed: 125
+dt_s: 1.0
+duration_s: 3600
+true_initial_soc: 0.90
+estimated_initial_soc: 0.78
+voltage_noise_std_v: 0.004
+current_noise_std_a: 0.015
+current_bias_a: 0.002
+voltage_variance: 0.000025
+process_variance:
+  soc: 0.00000008
+  v1: 0.0000004
+  v2: 0.0000002
+aging:
+  capacity_factor: 0.82
+  resistance_factor: 1.55
+observer:
+  use_aging_adaptation: false
+

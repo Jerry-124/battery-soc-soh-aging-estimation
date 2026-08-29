@@ -1,0 +1,87 @@
+{
+  "dataset": {
+    "publisher": "University of Oxford",
+    "doi": "10.5287/bodleian:KO2kdmYGg",
+    "cells": 8,
+    "rated_capacity_mah": 740,
+    "temperature_c": 40,
+    "characterization_interval_cycles": 100
+  },
+  "capacity": {
+    "initial_capacity_mah_mean": 733.4412434088147,
+    "initial_capacity_mah_std": 3.505043372223447,
+    "final_soh_pct_mean": 75.50177932135563,
+    "final_soh_pct_min": 62.029986254028906,
+    "final_soh_pct_max": 79.97394141989302
+  },
+  "resistance": {
+    "initial_effective_resistance_ohm_mean": 0.04635068462042152,
+    "final_resistance_factor_mean": 1.7040510806718323
+  },
+  "holdout_prediction": {
+    "train_fraction": 0.6,
+    "linear_rmse_pct": 2.846993471004611,
+    "linear_mae_pct": 2.2664872486010696,
+    "quadratic_rmse_pct": 1.90848860383912,
+    "quadratic_mae_pct": 0.8956314603661283,
+    "test_points": 212
+  },
+  "cells": {
+    "Cell1": {
+      "measurements": 78,
+      "last_cycle": 8200,
+      "initial_capacity_mah": 739.1109210621779,
+      "final_capacity_soh_pct": 75.854593254061,
+      "final_resistance_factor": 1.7059857149329098
+    },
+    "Cell2": {
+      "measurements": 73,
+      "last_cycle": 7700,
+      "initial_capacity_mah": 734.8189656975843,
+      "final_capacity_soh_pct": 74.15632912559396,
+      "final_resistance_factor": 2.2028856283123788
+    },
+    "Cell3": {
+      "measurements": 76,
+      "last_cycle": 8100,
+      "initial_capacity_mah": 735.119595112905,
+      "final_capacity_soh_pct": 76.97486324201383,
+      "final_resistance_factor": 1.718370154562512
+    },
+    "Cell4": {
+      "measurements": 47,
+      "last_cycle": 5100,
+      "initial_capacity_mah": 734.0756158938327,
+      "final_capacity_soh_pct": 79.17900540877062,
+      "final_resistance_factor": 1.4136499661289001
+    },
+    "Cell5": {
+      "measurements": 46,
+      "last_cycle": 5000,
+      "initial_capacity_mah": 735.336070718255,
+      "final_capacity_soh_pct": 62.029986254028906,
+      "final_resistance_factor": 1.787061912577756
+    },
+    "Cell6": {
+      "measurements": 46,
+      "last_cycle": 5000,
+      "initial_capacity_mah": 732.7947554512294,
+      "final_capacity_soh_pct": 79.01573362323434,
+      "final_resistance_factor": 1.422353604656603
+    },
+    "Cell7": {
+      "measurements": 77,
+      "last_cycle": 8100,
+      "initial_capacity_mah": 728.7460724569092,
+      "final_capacity_soh_pct": 79.97394141989302,
+      "final_resistance_factor": 1.674333797751132
+    },
+    "Cell8": {
+      "measurements": 76,
+      "last_cycle": 8100,
+      "initial_capacity_mah": 727.5279508776244,
+      "final_capacity_soh_pct": 76.82978224324943,
+      "final_resistance_factor": 1.707767866452467
+    }
+  }
+}

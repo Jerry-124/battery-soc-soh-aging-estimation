@@ -1,0 +1,49 @@
+{
+  "dataset": {
+    "publisher": "CALCE, University of Maryland",
+    "cell": "Samsung INR18650-20R (NMC/graphite)",
+    "temperature_c": 25,
+    "identification_profile": "11_05_2015_SP20-2_DST_80SOC.xls",
+    "validation_profile": "11_06_2015_SP20-2_FUDS_80SOC.xls",
+    "measured_capacity_ah": 2.028344937765965,
+    "reference_initial_soc": 0.802767444700385,
+    "estimator_initial_soc": 0.702767444700385,
+    "samples": 11201,
+    "open_loop_voltage_rmse_v": 0.022380813300365118
+  },
+  "identified_parameters": {
+    "r0": 0.07651079082251003,
+    "r1": 0.013916899717020046,
+    "c1": 830.9068120324647,
+    "r2": 0.031231519003075817,
+    "c2": 5040.221247888668,
+    "tau1_s": 11.563646777244637,
+    "tau2_s": 157.41376568314143,
+    "ocv_bias_v": 0.009774849340077128,
+    "voltage_rmse_v": 0.02630736306189151
+  },
+  "coulomb_counting": {
+    "rmse_pct": 9.64753783701894,
+    "mae_pct": 9.532975629299461,
+    "max_error_pct": 10.000000000000043,
+    "final_error_pct": -1.557810259371991,
+    "convergence_s": 11181.0,
+    "runtime_us_per_sample": 5.595973573072413
+  },
+  "ekf": {
+    "rmse_pct": 0.7311458289474098,
+    "mae_pct": 0.5982270802989386,
+    "max_error_pct": 9.999999999999998,
+    "final_error_pct": -1.557810259371991,
+    "convergence_s": 1.0,
+    "runtime_us_per_sample": 137.29419694706576
+  },
+  "ukf": {
+    "rmse_pct": 0.8487158003291848,
+    "mae_pct": 0.717113686926955,
+    "max_error_pct": 9.999999999999998,
+    "final_error_pct": -0.8561195762889319,
+    "convergence_s": 2.0,
+    "runtime_us_per_sample": 236.9907151141447
+  }
+}
