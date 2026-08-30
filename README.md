@@ -422,4 +422,6 @@ Pack balancing, electro-thermal gradients, fault diagnosis, embedded deployment,
 
 **Working synthetic, measured-data, and semi-empirical aging-aware validation pipeline.** The project identifies the ECM on CALCE DST data, validates SOC estimation on independent CALCE FUDS data, extracts capacity fade and pulse-resistance growth from CALCE CX2-3 and Oxford aging data, feeds measured health estimates back into EKF/UKF observers, and runs three robustness matrices. Remaining work focuses on multiple temperatures, cross-cell SOC robustness, and joint online SOC-SOH estimation during ordinary dynamic operation.
 
-No open-source license has been assigned. All rights are reserved unless permission is granted explicitly.
+## License
+
+This project is licensed under the [MIT License](LICENSE).
