@@ -16,6 +16,21 @@ outputs/
 .DS_Store
 Thumbs.db
 
+# Secrets and local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+secrets.*
+credentials.*
+*.credentials
+.streamlit/secrets.toml
+
 # Raw public datasets and bulky generated time series
 data/raw/*
 data/interim/*
