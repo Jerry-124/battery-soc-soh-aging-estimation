@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from pathlib import Path
 import sys
 import unittest
+from pathlib import Path
 
 import numpy as np
 
@@ -11,17 +11,20 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from battery_estimation.data.synthetic import simulate_dataset
 from battery_estimation.data.calce import OCVCurve
 from battery_estimation.data.oxford import effective_resistance_from_segments
+from battery_estimation.data.synthetic import simulate_dataset
 from battery_estimation.estimators import ExtendedKalmanFilter, UnscentedKalmanFilter
-from battery_estimation.health import (
-    adapt_parameters, capacity_soh, resistance_soh,
-    pulse_anchored_fresh_parameters, perturb_parameters,
-)
-from battery_estimation.models import ECMParameters, SecondOrderThevenin, docv_dsoc
 from battery_estimation.evaluation import calculate_metrics
+from battery_estimation.health import (
+    adapt_parameters,
+    capacity_soh,
+    perturb_parameters,
+    pulse_anchored_fresh_parameters,
+    resistance_soh,
+)
 from battery_estimation.identification import fit_2rc_ecm
+from battery_estimation.models import ECMParameters, SecondOrderThevenin, docv_dsoc
 
 
 class TestECM(unittest.TestCase):

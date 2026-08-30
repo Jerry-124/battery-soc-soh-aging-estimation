@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict
 import json
-from pathlib import Path
 import sys
 import time
+from dataclasses import asdict
+from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,8 +18,16 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from battery_estimation.data.calce import load_capacity_ah, load_dynamic_profile, load_incremental_ocv_curve
-from battery_estimation.estimators import CoulombCounter, ExtendedKalmanFilter, UnscentedKalmanFilter
+from battery_estimation.data.calce import (
+    load_capacity_ah,
+    load_dynamic_profile,
+    load_incremental_ocv_curve,
+)
+from battery_estimation.estimators import (
+    CoulombCounter,
+    ExtendedKalmanFilter,
+    UnscentedKalmanFilter,
+)
 from battery_estimation.evaluation import calculate_metrics
 from battery_estimation.identification import fit_2rc_ecm
 from battery_estimation.models import ECMParameters, SecondOrderThevenin

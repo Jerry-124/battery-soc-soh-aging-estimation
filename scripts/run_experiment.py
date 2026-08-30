@@ -3,11 +3,12 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-from pathlib import Path
 import sys
 import time
+from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,7 +20,11 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from battery_estimation.data.synthetic import simulate_dataset
-from battery_estimation.estimators import CoulombCounter, ExtendedKalmanFilter, UnscentedKalmanFilter
+from battery_estimation.estimators import (
+    CoulombCounter,
+    ExtendedKalmanFilter,
+    UnscentedKalmanFilter,
+)
 from battery_estimation.evaluation import calculate_metrics
 from battery_estimation.health import adapt_parameters, capacity_soh, resistance_soh
 from battery_estimation.models import ECMParameters, SecondOrderThevenin
@@ -46,6 +51,15 @@ def write_dataset(path: Path, dataset) -> None:
         writer = csv.writer(handle)
         writer.writerow(["time_s", "current_a", "voltage_v", "clean_voltage_v", "true_soc"])
         writer.writerows(zip(dataset.time_s, dataset.current_a, dataset.voltage_v, dataset.clean_voltage_v, dataset.true_soc))
+
+
+def output_directories(output_root: Path) -> tuple[Path, Path, Path]:
+    """Return all experiment artifact roots under the requested output root."""
+    return (
+        output_root / "metrics",
+        output_root / "figures",
+        output_root / "data" / "processed",
+    )
 
 
 def main() -> None:
@@ -94,9 +108,7 @@ def main() -> None:
         "observer_aging_adapted": bool(config["observer"]["use_aging_adaptation"]),
     }
     name = config["experiment_name"]
-    metrics_dir = args.output_root / "metrics"
-    figures_dir = args.output_root / "figures"
-    data_dir = ROOT / "data" / "processed"
+    metrics_dir, figures_dir, data_dir = output_directories(args.output_root)
     for directory in (metrics_dir, figures_dir, data_dir):
         directory.mkdir(parents=True, exist_ok=True)
     (metrics_dir / f"{name}.json").write_text(json.dumps(metrics, indent=2), encoding="utf-8")
@@ -129,4 +141,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

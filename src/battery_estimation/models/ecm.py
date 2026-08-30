@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, replace
-from typing import Callable
+
 import numpy as np
 
 
@@ -28,7 +29,7 @@ class ECMParameters:
     r2: float = 0.025
     c2: float = 12000.0
 
-    def aged(self, capacity_factor: float, resistance_factor: float) -> "ECMParameters":
+    def aged(self, capacity_factor: float, resistance_factor: float) -> ECMParameters:
         return replace(
             self,
             capacity_ah=self.capacity_ah * capacity_factor,

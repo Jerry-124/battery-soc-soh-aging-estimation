@@ -1,5 +1,15 @@
-from .soh import capacity_soh, resistance_soh, adapt_parameters
-from .aging_benchmark import pulse_anchored_fresh_parameters, perturb_parameters, run_kalman_observers
+from .aging_benchmark import (
+           perturb_parameters,
+           pulse_anchored_fresh_parameters,
+           run_kalman_observers,
+)
+from .soh import adapt_parameters, capacity_soh, resistance_soh
 
-__all__ = ["capacity_soh", "resistance_soh", "adapt_parameters",
-           "pulse_anchored_fresh_parameters", "perturb_parameters", "run_kalman_observers"]
+__all__ = [
+           "adapt_parameters",
+           "capacity_soh",
+           "perturb_parameters",
+           "pulse_anchored_fresh_parameters",
+           "resistance_soh",
+           "run_kalman_observers",
+]
