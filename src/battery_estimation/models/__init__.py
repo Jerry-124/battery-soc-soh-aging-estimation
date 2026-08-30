@@ -1,4 +1,4 @@
-from .ecm import ECMParameters, SecondOrderThevenin, ocv_from_soc, docv_dsoc
+from .ecm import ECMParameters, SecondOrderThevenin, docv_dsoc, ocv_from_soc
 
-__all__ = ["ECMParameters", "SecondOrderThevenin", "ocv_from_soc", "docv_dsoc"]
+__all__ = ["ECMParameters", "SecondOrderThevenin", "docv_dsoc", "ocv_from_soc"]
 

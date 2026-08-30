@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
@@ -13,7 +14,10 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from battery_estimation.data.synthetic import simulate_dataset
 from battery_estimation.evaluation import calculate_metrics
-from battery_estimation.health import pulse_anchored_fresh_parameters, run_kalman_observers
+from battery_estimation.health import (
+    pulse_anchored_fresh_parameters,
+    run_kalman_observers,
+)
 
 
 def main() -> None:

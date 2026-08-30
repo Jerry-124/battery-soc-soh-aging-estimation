@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,7 +17,10 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from battery_estimation.data.calce_cx2 import aggregate_cx2_by_file, extract_cx2_pulse_records
+from battery_estimation.data.calce_cx2 import (
+    aggregate_cx2_by_file,
+    extract_cx2_pulse_records,
+)
 
 
 def trailing_median(values: np.ndarray, window: int = 3) -> np.ndarray:
@@ -48,8 +52,8 @@ def main() -> None:
             "publisher": "CALCE, University of Maryland",
             "cell": "CX2-3 LiCoO2 pouch cell",
             "source_url": "https://web.calce.umd.edu/batteries/data/CX2_3.zip",
-            "files_with_valid_cycles": int(len(aging)),
-            "pulse_cycles_sampled": int(len(records)),
+            "files_with_valid_cycles": len(aging),
+            "pulse_cycles_sampled": len(records),
             "first_timestamp": aging["timestamp"].iloc[0].isoformat(),
             "last_timestamp": aging["timestamp"].iloc[-1].isoformat(),
         },

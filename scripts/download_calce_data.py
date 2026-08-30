@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from pathlib import Path
-import ssl
-import urllib.request
 import zipfile
+from pathlib import Path
 
+from download_utils import download_https
 
 ROOT = Path(__file__).resolve().parents[1]
+CALCE_HOSTS = {"web.calce.umd.edu"}
 FILES = {
     "ocv": (
         "https://web.calce.umd.edu/batteries/data/SP1_25C_IC_OCV_12_2_2015.zip",
@@ -29,23 +29,28 @@ FILES = {
 }
 
 
+def _verify_archive(path: Path, expected_sha256: str) -> None:
+    actual_sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
+    if actual_sha256 != expected_sha256:
+        raise RuntimeError(f"SHA-256 mismatch for {path.name}: {actual_sha256}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Download official CALCE INR18650-20R validation data")
     parser.add_argument("--output", type=Path, default=ROOT / "data" / "raw" / "calce")
-    parser.add_argument("--insecure", action="store_true", help="Disable TLS certificate checks only when the local certificate store is broken")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
-    context = ssl._create_unverified_context() if args.insecure else ssl.create_default_context()
     for label, (url, expected_sha256) in FILES.items():
         archive = args.output / f"{label}.zip"
         if not archive.exists():
             print(f"Downloading {label}: {url}")
-            with urllib.request.urlopen(url, context=context) as response, archive.open("wb") as handle:
-                while chunk := response.read(1024 * 1024):
-                    handle.write(chunk)
-        actual_sha256 = hashlib.sha256(archive.read_bytes()).hexdigest()
-        if actual_sha256 != expected_sha256:
-            raise RuntimeError(f"SHA-256 mismatch for {archive.name}: {actual_sha256}")
+            download_https(
+                url,
+                archive,
+                user_agent="battery-soc-soh-aging-estimation/1.0",
+                allowed_hosts=CALCE_HOSTS,
+            )
+        _verify_archive(archive, expected_sha256)
         destination = args.output / label
         destination.mkdir(exist_ok=True)
         with zipfile.ZipFile(archive) as bundle:

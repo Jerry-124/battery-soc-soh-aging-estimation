@@ -25,6 +25,12 @@ def identify_relaxation_grid(time_s: np.ndarray, polarization_v: np.ndarray) -> 
             mse = float(np.mean((prediction - y) ** 2))
             if best is None or mse < best[0]:
                 best = (mse, tau1, tau2, float(amplitudes[0]), float(amplitudes[1]))
-    assert best is not None
-    return {"mse": best[0], "tau1_s": best[1], "tau2_s": best[2], "amplitude1_v": best[3], "amplitude2_v": best[4]}
-
+    if best is None:
+        raise RuntimeError("Relaxation grid search produced no candidate fit")
+    return {
+        "mse": best[0],
+        "tau1_s": best[1],
+        "tau2_s": best[2],
+        "amplitude1_v": best[3],
+        "amplitude2_v": best[4],
+    }

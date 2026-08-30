@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import numpy as np
 
@@ -12,7 +12,10 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from battery_estimation.identification import identify_ohmic_resistance, identify_relaxation_grid
+from battery_estimation.identification import (
+    identify_ohmic_resistance,
+    identify_relaxation_grid,
+)
 from battery_estimation.models import ECMParameters
 
 

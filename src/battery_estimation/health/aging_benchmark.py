@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+
 import numpy as np
 
 from battery_estimation.estimators import ExtendedKalmanFilter, UnscentedKalmanFilter
