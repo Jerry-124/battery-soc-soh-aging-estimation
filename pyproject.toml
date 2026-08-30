@@ -6,6 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "battery-soc-soh-aging-estimation"
 version = "0.1.0"
 description = "Battery SOC/SOH estimation with a 2-RC ECM, EKF/UKF, and aging-aware adaptation."
+readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.10"
 dependencies = [
   "numpy>=1.24",
@@ -15,6 +17,9 @@ dependencies = [
   "openpyxl>=3.1",
   "xlrd>=2.0",
   "scipy>=1.11",
+]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
 ]
 
 [project.optional-dependencies]
