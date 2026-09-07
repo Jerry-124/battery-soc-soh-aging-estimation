@@ -23,7 +23,13 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = [
+  "pytest>=8,<9",
+  "ruff>=0.16,<0.17",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
