@@ -1,13 +1,14 @@
 # Battery SOC/SOH Estimation with EKF/UKF and Aging-Aware Modeling
 
+[![Version](https://img.shields.io/badge/version-v1.1.0-blueviolet)](CHANGELOG.md)
 [![Status](https://img.shields.io/badge/status-measured--data%20validation-green)](#status)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](#quick-start)
 [![CI](https://github.com/Jerry-124/battery-soc-soh-aging-estimation/actions/workflows/ci.yml/badge.svg)](https://github.com/Jerry-124/battery-soc-soh-aging-estimation/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-24-brightgreen)](#verification)
+[![Tests](https://img.shields.io/badge/tests-27-brightgreen)](#verification)
 
 `battery-soc-soh-aging-estimation` is a reproducible Battery Management System (BMS) project for lithium-ion battery modeling, State of Charge (SOC) estimation, State of Health (SOH) tracking, and aging-aware observer adaptation.
 
-The current working MVP implements:
+The current **V1.1.0** portfolio release implements:
 
 - a discrete second-order Thevenin equivalent circuit model (2-RC ECM);
 - a nonlinear, monotonic synthetic OCV-SOC relationship and analytical derivative;
@@ -85,7 +86,7 @@ The UKF uses scaled sigma points with configurable $\alpha$, $\beta$, and $\kapp
 
 ## SOH and Aging-Aware Adaptation
 
-The MVP reports two independent health indicators:
+The project reports two independent health indicators:
 
 ```math
 SOH_Q=\frac{Q_{usable}}{Q_{rated}}\times100\%,
@@ -259,6 +260,7 @@ The high parameter-uncertainty errors are intentionally retained: they show why 
 ```text
 battery-soc-soh-aging-estimation/
 |-- README.md
+|-- CHANGELOG.md
 |-- pyproject.toml
 |-- .github/workflows/ci.yml       # Python 3.10/3.12 CI, pytest, and Ruff
 |-- configs/experiments/           # Reproducible YAML scenarios
@@ -344,7 +346,7 @@ python scripts/download_calce_data.py
 python scripts/run_calce_validation.py
 ```
 
-Downloaders require validated HTTPS endpoints, restrict known datasets to allow-listed hosts, and verify the expected SHA-256 before data are used.
+Downloaders require validated HTTPS endpoints, restrict known datasets to allow-listed hosts, revalidate the final redirect destination, and verify the expected SHA-256 before data are used.
 
 Download the Oxford aging dataset and run measured SOH validation:
 
@@ -382,11 +384,12 @@ The current test suite covers:
 - explicit capacity and resistance parameter perturbation;
 - CALCE cycle and relaxed-OCV parsing regressions;
 - ECM-fit regression behavior;
-- HTTPS/host allow-list download security;
+- HTTPS/host allow-list and redirect-host download security;
+- physical validation of ECM and synthetic experiment inputs;
 - experiment-output isolation;
 - robustness-matrix aggregation and indexing.
 
-The suite currently contains **24 pytest tests**. GitHub Actions runs compile checks, the full pytest suite, dependency consistency checks, and Ruff on Python 3.10 and 3.12.
+The suite currently contains **27 pytest tests**. GitHub Actions runs compile checks, the full pytest suite, dependency consistency checks, and Ruff on Python 3.10 and 3.12.
 
 ## Development Roadmap
 
@@ -409,6 +412,7 @@ The suite currently contains **24 pytest tests**. GitHub Actions runs compile ch
 - [x] Add initial-SOC, measurement-noise, and parameter-uncertainty matrices
 - [x] Add persistent-convergence and post-convergence metrics
 - [x] Add continuous integration
+- [x] Add physical input validation and redirect-host download hardening
 - [ ] Identify SOC-dependent ECM parameter tables from multiple measured SOC windows
 - [ ] Separate identification, validation, and test cells/cycles
 - [ ] Add temperature-dependent parameter maps
@@ -425,7 +429,7 @@ Pack balancing, electro-thermal gradients, fault diagnosis, embedded deployment,
 
 ## Status
 
-**Working synthetic, measured-data, and semi-empirical aging-aware validation pipeline.** The project identifies the ECM on CALCE DST data, validates SOC estimation on independent CALCE FUDS data, extracts capacity fade and pulse-resistance growth from CALCE CX2-3 and Oxford aging data, feeds measured health estimates back into EKF/UKF observers, and runs three robustness matrices. Remaining work focuses on multiple temperatures, cross-cell SOC robustness, and joint online SOC-SOH estimation during ordinary dynamic operation.
+**V1.1.0 portfolio baseline: working synthetic, measured-data, and semi-empirical aging-aware validation pipeline.** The project identifies the ECM on CALCE DST data, validates SOC estimation on independent CALCE FUDS data, extracts capacity fade and pulse-resistance growth from CALCE CX2-3 and Oxford aging data, feeds measured health estimates back into EKF/UKF observers, and runs three robustness matrices. The current release also validates physical model/experiment inputs and hardens dataset downloads against unexpected redirect hosts. Remaining work focuses on multiple temperatures, cross-cell SOC robustness, and joint online SOC-SOH estimation during ordinary dynamic operation.
 
 ## License
 
