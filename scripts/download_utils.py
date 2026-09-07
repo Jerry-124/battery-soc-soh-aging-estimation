@@ -36,10 +36,13 @@ def download_https(
     digest = hashlib.sha256()
     bytes_written = 0
     destination.parent.mkdir(parents=True, exist_ok=True)
-    # B310 is safe here because validate_https_url rejects file/custom schemes before urlopen.
-    with urllib.request.urlopen(request, timeout=timeout_s) as response, destination.open("wb") as handle:  # nosec B310
-        while chunk := response.read(1024 * 1024):
-            handle.write(chunk)
-            digest.update(chunk)
-            bytes_written += len(chunk)
+    # B310 is safe here because both the requested URL and the post-redirect URL are validated.
+    with urllib.request.urlopen(request, timeout=timeout_s) as response:  # nosec B310
+        final_url = response.geturl()
+        validate_https_url(final_url, allowed_hosts=allowed_hosts)
+        with destination.open("wb") as handle:
+            while chunk := response.read(1024 * 1024):
+                handle.write(chunk)
+                digest.update(chunk)
+                bytes_written += len(chunk)
     return DownloadResult(bytes_written=bytes_written, sha256=digest.hexdigest())
