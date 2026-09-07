@@ -20,6 +20,10 @@ class SyntheticDataset:
 
 def generate_dynamic_current(n_steps: int, dt_s: float, seed: int) -> np.ndarray:
     """Create a deterministic mixed pulse/drive current profile."""
+    if n_steps <= 0:
+        raise ValueError("n_steps must be positive")
+    if dt_s <= 0.0:
+        raise ValueError("dt_s must be positive")
     rng = np.random.default_rng(seed)
     current = np.zeros(n_steps, dtype=float)
     levels = np.array([-1.8, -0.8, 0.0, 0.7, 1.3, 2.1, 2.8])
@@ -46,6 +50,15 @@ def simulate_dataset(
     seed: int,
     resistance_factor: float = 1.0,
 ) -> SyntheticDataset:
+    if dt_s <= 0.0 or duration_s <= 0.0:
+        raise ValueError("dt_s and duration_s must be positive")
+    if not 0.0 <= initial_soc <= 1.0:
+        raise ValueError("initial_soc must be in [0, 1]")
+    if voltage_noise_std_v < 0.0 or current_noise_std_a < 0.0:
+        raise ValueError("Noise standard deviations must be non-negative")
+    if resistance_factor <= 0.0:
+        raise ValueError("resistance_factor must be positive")
+
     n_steps = int(duration_s / dt_s) + 1
     rng = np.random.default_rng(seed)
     true_current = generate_dynamic_current(n_steps, dt_s, seed)
@@ -69,4 +82,3 @@ def simulate_dataset(
         capacity_ah=params.capacity_ah,
         resistance_factor=resistance_factor,
     )
-
