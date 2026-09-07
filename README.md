@@ -2,7 +2,8 @@
 
 [![Status](https://img.shields.io/badge/status-measured--data%20validation-green)](#status)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](#quick-start)
-[![Tests](https://img.shields.io/badge/tests-11%20passing-brightgreen)](#verification)
+[![CI](https://github.com/Jerry-124/battery-soc-soh-aging-estimation/actions/workflows/ci.yml/badge.svg)](https://github.com/Jerry-124/battery-soc-soh-aging-estimation/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-24-brightgreen)](#verification)
 
 `battery-soc-soh-aging-estimation` is a reproducible Battery Management System (BMS) project for lithium-ion battery modeling, State of Charge (SOC) estimation, State of Health (SOH) tracking, and aging-aware observer adaptation.
 
@@ -17,9 +18,9 @@ The current working MVP implements:
 - NumPy-only pulse-relaxation parameter identification;
 - nominal, aged fixed-parameter, and aged adaptive benchmark scenarios;
 - JSON metrics, CSV datasets, Markdown reports, and PNG figures;
-- automated unit and integration-level algorithm tests.
-- measured-data parameter identification on CALCE DST and independent validation on CALCE FUDS.
-- measured capacity-fade and resistance-growth validation on eight Oxford aging cells.
+- automated unit and integration-level algorithm tests;
+- measured-data parameter identification on CALCE DST and independent validation on CALCE FUDS;
+- measured capacity-fade and resistance-growth validation on eight Oxford aging cells;
 - full-life CALCE CX2-3 capacity and strict 5-second pulse-resistance extraction;
 - measured-aging-informed fresh/aged/estimated-aging-aware observer comparison;
 - initial-SOC, measurement-noise, and parameter-uncertainty robustness matrices.
@@ -105,7 +106,7 @@ The original controlled benchmark can inject a known synthetic health condition.
 - branch amplitudes from linear least squares;
 - held values and output metrics written to JSON.
 
-The current identification input is synthetic and deliberately noisy. The implementation uses NumPy only, so the project can run in the supplied environment without SciPy.
+The current identification input is synthetic and deliberately noisy. The identification routine itself uses NumPy only; measured-data processing elsewhere in the project uses the dependencies declared in `pyproject.toml`, including SciPy where required.
 
 ## Benchmark Scenarios
 
@@ -259,9 +260,10 @@ The high parameter-uncertainty errors are intentionally retained: they show why 
 battery-soc-soh-aging-estimation/
 |-- README.md
 |-- pyproject.toml
+|-- .github/workflows/ci.yml       # Python 3.10/3.12 CI, pytest, and Ruff
 |-- configs/experiments/           # Reproducible YAML scenarios
 |-- docs/data_sources.md           # Provenance and experimental-data notes
-|-- data/processed/                # Generated CSV files, ignored by Git
+|-- data/processed/                # Curated processed CSVs are committed; bulky outputs stay ignored
 |-- scripts/
 |   |-- identify_parameters.py
 |   |-- download_calce_data.py
@@ -275,17 +277,14 @@ battery-soc-soh-aging-estimation/
 |   |-- run_experiment.py
 |   `-- generate_report.py
 |-- src/battery_estimation/
-|   |-- data/                      # Synthetic data generation
+|   |-- data/                      # Synthetic and measured-data helpers
 |   |-- models/                    # 2-RC ECM and OCV model
 |   |-- estimators/                # Coulomb Counting, EKF, UKF
 |   |-- health/                    # SOH metrics and adaptation
 |   |-- identification/            # Pulse-relaxation fitting
 |   `-- evaluation/                # Accuracy metrics
 |-- tests/
-`-- results/
-    |-- figures/                   # Generated plots, ignored by Git
-    |-- metrics/                   # Generated JSON, ignored by Git
-    `-- reports/                   # Generated Markdown, ignored by Git
+`-- results/                       # Curated figures, metrics, and reports are committed
 ```
 
 ## Quick Start
@@ -297,7 +296,7 @@ git clone https://github.com/Jerry-124/battery-soc-soh-aging-estimation.git
 cd battery-soc-soh-aging-estimation
 ```
 
-Create an environment and install the project:
+Create an environment and install the project with development tooling:
 
 ```bash
 python -m venv .venv
@@ -308,7 +307,7 @@ Windows PowerShell:
 ```powershell
 .venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install -e .
+python -m pip install -e ".[dev]"
 ```
 
 If dependencies are already available but network access is restricted, use `python -m pip install -e . --no-deps --no-build-isolation`.
@@ -318,13 +317,14 @@ Linux or macOS:
 ```bash
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e .
+python -m pip install -e ".[dev]"
 ```
 
 Run verification:
 
 ```bash
-python -m unittest discover -s tests -v
+python -m pytest -q
+ruff check .
 ```
 
 Run parameter identification and all benchmarks:
@@ -344,7 +344,7 @@ python scripts/download_calce_data.py
 python scripts/run_calce_validation.py
 ```
 
-If the local Windows certificate store prevents access to the official HTTPS server, the downloader provides an explicit `--insecure` fallback. Use it only for these known CALCE URLs.
+Downloaders require validated HTTPS endpoints, restrict known datasets to allow-listed hosts, and verify the expected SHA-256 before data are used.
 
 Download the Oxford aging dataset and run measured SOH validation:
 
@@ -366,7 +366,7 @@ python scripts/run_robustness_matrix.py
 
 After the first extraction, `python scripts/run_cx2_pulse_aging.py --reuse-records` rebuilds figures and metrics from the processed cycle table without rereading the large workbooks.
 
-Generated artifacts are saved under `data/processed/` and `results/`.
+Generated artifacts are saved under `data/processed/` and `results/`; selected reproducibility artifacts are intentionally versioned while bulky raw/intermediate data remain ignored.
 
 ## Verification
 
@@ -377,11 +377,16 @@ The current test suite covers:
 - monotonic OCV behavior;
 - capacity/resistance SOH and bounded parameter adaptation;
 - JSON-safe non-convergence metrics;
-- EKF and UKF recovery from initial SOC error.
+- EKF and UKF recovery from initial SOC error;
 - measured-pulse anchoring of the 2-RC resistance response;
-- explicit capacity and resistance parameter perturbation.
+- explicit capacity and resistance parameter perturbation;
+- CALCE cycle and relaxed-OCV parsing regressions;
+- ECM-fit regression behavior;
+- HTTPS/host allow-list download security;
+- experiment-output isolation;
+- robustness-matrix aggregation and indexing.
 
-Current local result: **11 tests passing** on Python 3.12.9.
+The suite currently contains **24 pytest tests**. GitHub Actions runs compile checks, the full pytest suite, dependency consistency checks, and Ruff on Python 3.10 and 3.12.
 
 ## Development Roadmap
 
@@ -403,12 +408,12 @@ Current local result: **11 tests passing** on Python 3.12.9.
 - [x] Compare fresh-fixed, oracle aged-fixed, and estimated aging-aware parameters
 - [x] Add initial-SOC, measurement-noise, and parameter-uncertainty matrices
 - [x] Add persistent-convergence and post-convergence metrics
+- [x] Add continuous integration
 - [ ] Identify SOC-dependent ECM parameter tables from multiple measured SOC windows
 - [ ] Separate identification, validation, and test cells/cycles
 - [ ] Add temperature-dependent parameter maps
 - [ ] Jointly estimate capacity and resistance online during normal drive operation
 - [ ] Compare filters across DST/FUDS/UDDS or equivalent measured profiles
-- [ ] Add continuous integration
 
 ## Scope
 
