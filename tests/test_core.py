@@ -42,6 +42,48 @@ class TestECM(unittest.TestCase):
     def test_ocv_derivative_is_positive(self):
         self.assertTrue(np.all(docv_dsoc(np.linspace(0.0, 1.0, 101)) > 0.0))
 
+    def test_invalid_physical_parameters_are_rejected(self):
+        invalid_cases = (
+            {"capacity_ah": 0.0},
+            {"coulombic_efficiency": 0.0},
+            {"coulombic_efficiency": 1.01},
+            {"r0": 0.0},
+            {"r1": -0.01},
+            {"c1": 0.0},
+            {"r2": -0.01},
+            {"c2": 0.0},
+        )
+        for values in invalid_cases:
+            with self.subTest(values=values), self.assertRaises(ValueError):
+                ECMParameters(**values)
+        with self.assertRaises(ValueError):
+            ECMParameters().aged(0.0, 1.0)
+
+    def test_invalid_synthetic_inputs_are_rejected(self):
+        params = ECMParameters()
+        invalid_cases = (
+            {"dt_s": 0.0},
+            {"duration_s": 0.0},
+            {"initial_soc": 1.1},
+            {"voltage_noise_std_v": -0.001},
+            {"current_noise_std_a": -0.001},
+            {"resistance_factor": 0.0},
+        )
+        defaults = {
+            "params": params,
+            "dt_s": 1.0,
+            "duration_s": 10.0,
+            "initial_soc": 0.8,
+            "voltage_noise_std_v": 0.0,
+            "current_noise_std_a": 0.0,
+            "current_bias_a": 0.0,
+            "seed": 1,
+            "resistance_factor": 1.0,
+        }
+        for override in invalid_cases:
+            with self.subTest(override=override), self.assertRaises(ValueError):
+                simulate_dataset(**{**defaults, **override})
+
 
 class TestHealth(unittest.TestCase):
     def test_soh_and_adaptation(self):
