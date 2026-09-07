@@ -29,7 +29,18 @@ class ECMParameters:
     r2: float = 0.025
     c2: float = 12000.0
 
+    def __post_init__(self) -> None:
+        if self.capacity_ah <= 0.0:
+            raise ValueError("capacity_ah must be positive")
+        if not 0.0 < self.coulombic_efficiency <= 1.0:
+            raise ValueError("coulombic_efficiency must be in (0, 1]")
+        for name in ("r0", "r1", "r2", "c1", "c2"):
+            if getattr(self, name) <= 0.0:
+                raise ValueError(f"{name} must be positive")
+
     def aged(self, capacity_factor: float, resistance_factor: float) -> ECMParameters:
+        if capacity_factor <= 0.0 or resistance_factor <= 0.0:
+            raise ValueError("Aging factors must be positive")
         return replace(
             self,
             capacity_ah=self.capacity_ah * capacity_factor,
