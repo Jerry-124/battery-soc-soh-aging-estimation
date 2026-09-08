@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "battery-soc-soh-aging-estimation"
-version = "1.1.0"
+version = "1.1.1"
 description = "Battery SOC/SOH estimation with a 2-RC ECM, EKF/UKF, and aging-aware adaptation."
 readme = "README.md"
 license = { file = "LICENSE" }
