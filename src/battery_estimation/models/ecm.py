@@ -9,13 +9,22 @@ import numpy as np
 def ocv_from_soc(soc: np.ndarray | float) -> np.ndarray | float:
     """Smooth monotonic synthetic NMC-like OCV curve used by the demo."""
     z = np.asarray(soc, dtype=float)
-    value = 3.05 + 1.02 * z + 0.10 * np.tanh(8.0 * (z - 0.12)) + 0.05 * np.tanh(10.0 * (z - 0.88))
+    value = (
+        3.05
+        + 1.02 * z
+        + 0.10 * np.tanh(8.0 * (z - 0.12))
+        + 0.05 * np.tanh(10.0 * (z - 0.88))
+    )
     return float(value) if value.ndim == 0 else value
 
 
 def docv_dsoc(soc: np.ndarray | float) -> np.ndarray | float:
     z = np.asarray(soc, dtype=float)
-    value = 1.02 + 0.8 / np.cosh(8.0 * (z - 0.12)) ** 2 + 0.5 / np.cosh(10.0 * (z - 0.88)) ** 2
+    value = (
+        1.02
+        + 0.8 / np.cosh(8.0 * (z - 0.12)) ** 2
+        + 0.5 / np.cosh(10.0 * (z - 0.88)) ** 2
+    )
     return float(value) if value.ndim == 0 else value
 
 
@@ -72,7 +81,9 @@ class SecondOrderThevenin:
         soc, v1, v2 = np.asarray(state, dtype=float)
         a1 = np.exp(-self.dt_s / (p.r1 * p.c1))
         a2 = np.exp(-self.dt_s / (p.r2 * p.c2))
-        next_soc = soc - p.coulombic_efficiency * current_a * self.dt_s / (3600.0 * p.capacity_ah)
+        next_soc = soc - p.coulombic_efficiency * current_a * self.dt_s / (
+            3600.0 * p.capacity_ah
+        )
         next_v1 = a1 * v1 + p.r1 * (1.0 - a1) * current_a
         next_v2 = a2 * v2 + p.r2 * (1.0 - a2) * current_a
         return np.array([np.clip(next_soc, 0.0, 1.0), next_v1, next_v2], dtype=float)
@@ -83,11 +94,15 @@ class SecondOrderThevenin:
 
     def state_jacobian(self) -> np.ndarray:
         p = self.params
-        return np.diag([
-            1.0,
-            np.exp(-self.dt_s / (p.r1 * p.c1)),
-            np.exp(-self.dt_s / (p.r2 * p.c2)),
-        ])
+        return np.diag(
+            [
+                1.0,
+                np.exp(-self.dt_s / (p.r1 * p.c1)),
+                np.exp(-self.dt_s / (p.r2 * p.c2)),
+            ]
+        )
 
     def measurement_jacobian(self, state: np.ndarray) -> np.ndarray:
-        return np.array([[self.docv_function(float(state[0])), -1.0, -1.0]], dtype=float)
+        return np.array(
+            [[self.docv_function(float(state[0])), -1.0, -1.0]], dtype=float
+        )

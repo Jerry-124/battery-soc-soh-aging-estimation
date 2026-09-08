@@ -154,7 +154,9 @@ def _write_rows(path: Path, rows: list[dict]) -> None:
         writer.writerows(rows)
 
 
-def _observer_summary(rows: list[dict], category: str, observer: str) -> dict[str, float]:
+def _observer_summary(
+    rows: list[dict], category: str, observer: str
+) -> dict[str, float]:
     values = [
         row["post_300s_rmse_pct"]
         for row in rows
@@ -222,7 +224,10 @@ def _uncertainty_matrix(rows: list[dict], observer: str = "ekf") -> np.ndarray:
     }
     return np.array(
         [
-            [lookup[f"C={capacity:.1f},R={resistance:.1f}"] for resistance in UNCERTAINTY_LEVELS]
+            [
+                lookup[f"C={capacity:.1f},R={resistance:.1f}"]
+                for resistance in UNCERTAINTY_LEVELS
+            ]
             for capacity in UNCERTAINTY_LEVELS
         ],
         dtype=float,

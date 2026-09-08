@@ -48,14 +48,28 @@ class UnscentedKalmanFilter:
             points[self.n + i + 1] = mean - root[:, i]
         return points
 
-    def step(self, current_a: float, voltage_v: float, measurement_current_a: float | None = None) -> np.ndarray:
+    def step(
+        self,
+        current_a: float,
+        voltage_v: float,
+        measurement_current_a: float | None = None,
+    ) -> np.ndarray:
         sigma = self._sigma_points(self.x, self.p)
-        predicted_sigma = np.array([self.model.transition(point, current_a) for point in sigma])
+        predicted_sigma = np.array(
+            [self.model.transition(point, current_a) for point in sigma]
+        )
         x_pred = np.sum(self.wm[:, None] * predicted_sigma, axis=0)
         dx = predicted_sigma - x_pred
         p_pred = np.einsum("i,ij,ik->jk", self.wc, dx, dx) + self.q
-        measurement_current = current_a if measurement_current_a is None else measurement_current_a
-        voltage_sigma = np.array([self.model.terminal_voltage(point, measurement_current) for point in predicted_sigma])
+        measurement_current = (
+            current_a if measurement_current_a is None else measurement_current_a
+        )
+        voltage_sigma = np.array(
+            [
+                self.model.terminal_voltage(point, measurement_current)
+                for point in predicted_sigma
+            ]
+        )
         voltage_pred = float(np.dot(self.wm, voltage_sigma))
         dz = voltage_sigma - voltage_pred
         s = float(np.dot(self.wc, dz * dz) + self.r)
@@ -71,5 +85,7 @@ class UnscentedKalmanFilter:
         states = np.empty((len(current_a), self.n), dtype=float)
         states[0] = self.x
         for k in range(1, len(current_a)):
-            states[k] = self.step(float(current_a[k - 1]), float(voltage_v[k]), float(current_a[k]))
+            states[k] = self.step(
+                float(current_a[k - 1]), float(voltage_v[k]), float(current_a[k])
+            )
         return states

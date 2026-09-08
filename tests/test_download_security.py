@@ -31,7 +31,9 @@ def test_validate_https_url_rejects_unexpected_host() -> None:
         )
 
 
-def test_download_rejects_redirect_to_unexpected_host(monkeypatch, tmp_path: Path) -> None:
+def test_download_rejects_redirect_to_unexpected_host(
+    monkeypatch, tmp_path: Path
+) -> None:
     class RedirectedResponse:
         def __enter__(self):
             return self

@@ -37,7 +37,9 @@ class TestECM(unittest.TestCase):
         model = SecondOrderThevenin(ECMParameters(), 1.0)
         state = np.array([0.7, 0.0, 0.0])
         self.assertLess(model.transition(state, 2.0)[0], state[0])
-        self.assertLess(model.terminal_voltage(state, 2.0), model.terminal_voltage(state, 0.0))
+        self.assertLess(
+            model.terminal_voltage(state, 2.0), model.terminal_voltage(state, 0.0)
+        )
 
     def test_ocv_derivative_is_positive(self):
         self.assertTrue(np.all(docv_dsoc(np.linspace(0.0, 1.0, 101)) > 0.0))
@@ -89,12 +91,18 @@ class TestHealth(unittest.TestCase):
     def test_soh_and_adaptation(self):
         reference = ECMParameters()
         adapted = adapt_parameters(reference, reference.capacity_ah * 0.8, 1.5)
-        self.assertAlmostEqual(capacity_soh(adapted.capacity_ah, reference.capacity_ah), 80.0)
+        self.assertAlmostEqual(
+            capacity_soh(adapted.capacity_ah, reference.capacity_ah), 80.0
+        )
         self.assertAlmostEqual(resistance_soh(adapted.r0, reference.r0), 100.0 / 1.5)
 
     def test_pulse_anchor_matches_five_second_response(self):
         params = pulse_anchored_fresh_parameters(1.35, 0.12)
-        response = params.r0 + params.r1 * (1 - np.exp(-5 / (params.r1 * params.c1))) + params.r2 * (1 - np.exp(-5 / (params.r2 * params.c2)))
+        response = (
+            params.r0
+            + params.r1 * (1 - np.exp(-5 / (params.r1 * params.c1)))
+            + params.r2 * (1 - np.exp(-5 / (params.r2 * params.c2)))
+        )
         self.assertAlmostEqual(response, 0.12, places=10)
 
     def test_parameter_perturbation_is_explicit(self):
@@ -131,8 +139,16 @@ class TestMeasuredDataSupport(unittest.TestCase):
             return value
 
         ocv = np.full(len(current), 3.7)
-        voltage = ocv - 0.02 * current - 0.012 * response(10.0) - 0.03 * response(200.0) + 0.006
-        fit = fit_2rc_ecm(current, voltage, ocv, dt, np.array([10.0]), np.array([200.0]))
+        voltage = (
+            ocv
+            - 0.02 * current
+            - 0.012 * response(10.0)
+            - 0.03 * response(200.0)
+            + 0.006
+        )
+        fit = fit_2rc_ecm(
+            current, voltage, ocv, dt, np.array([10.0]), np.array([200.0])
+        )
         self.assertAlmostEqual(fit.r0, 0.02, places=6)
         self.assertAlmostEqual(fit.r1, 0.012, places=6)
         self.assertAlmostEqual(fit.r2, 0.03, places=6)
@@ -145,7 +161,9 @@ class TestMeasuredDataSupport(unittest.TestCase):
         base_voltage = 4.2 - 1.2 * np.abs(q) / 700.0
         load = {"q": q, "t": t_load_days, "v": base_voltage - 0.7 * 0.05}
         ocv = {"q": q, "t": t_ocv_days, "v": base_voltage - 0.04 * 0.05}
-        self.assertAlmostEqual(effective_resistance_from_segments(load, ocv), 0.05, places=3)
+        self.assertAlmostEqual(
+            effective_resistance_from_segments(load, ocv), 0.05, places=3
+        )
 
 
 class TestFilters(unittest.TestCase):
@@ -156,8 +174,12 @@ class TestFilters(unittest.TestCase):
         x0 = np.array([0.75, 0.0, 0.0])
         p0 = np.diag([0.04, 0.002, 0.002])
         q = np.diag([8e-8, 4e-7, 2e-7])
-        ekf = ExtendedKalmanFilter(model, x0, p0, q, 2.5e-5).run(data.current_a, data.voltage_v)[:, 0]
-        ukf = UnscentedKalmanFilter(model, x0, p0, q, 2.5e-5).run(data.current_a, data.voltage_v)[:, 0]
+        ekf = ExtendedKalmanFilter(model, x0, p0, q, 2.5e-5).run(
+            data.current_a, data.voltage_v
+        )[:, 0]
+        ukf = UnscentedKalmanFilter(model, x0, p0, q, 2.5e-5).run(
+            data.current_a, data.voltage_v
+        )[:, 0]
         self.assertLess(abs(ekf[-1] - data.true_soc[-1]), 0.03)
         self.assertLess(abs(ukf[-1] - data.true_soc[-1]), 0.03)
 

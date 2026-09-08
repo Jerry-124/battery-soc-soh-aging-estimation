@@ -13,11 +13,17 @@ OXFORD_HOSTS = {"ora.ox.ac.uk"}
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Download Oxford Battery Degradation Dataset 1")
+    parser = argparse.ArgumentParser(
+        description="Download Oxford Battery Degradation Dataset 1"
+    )
     parser.add_argument(
         "--output",
         type=Path,
-        default=ROOT / "data" / "raw" / "oxford" / "Oxford_Battery_Degradation_Dataset_1.mat",
+        default=ROOT
+        / "data"
+        / "raw"
+        / "oxford"
+        / "Oxford_Battery_Degradation_Dataset_1.mat",
     )
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -32,7 +38,9 @@ def main() -> None:
         actual = hashlib.file_digest(handle, "sha256").hexdigest()
     if actual != SHA256:
         raise RuntimeError(f"SHA-256 mismatch: {actual}")
-    print(f"Ready: {args.output} ({args.output.stat().st_size} bytes, SHA-256 verified)")
+    print(
+        f"Ready: {args.output} ({args.output.stat().st_size} bytes, SHA-256 verified)"
+    )
 
 
 if __name__ == "__main__":

@@ -62,7 +62,9 @@ def simulate_dataset(
     n_steps = int(duration_s / dt_s) + 1
     rng = np.random.default_rng(seed)
     true_current = generate_dynamic_current(n_steps, dt_s, seed)
-    measured_current = true_current + current_bias_a + rng.normal(0.0, current_noise_std_a, n_steps)
+    measured_current = (
+        true_current + current_bias_a + rng.normal(0.0, current_noise_std_a, n_steps)
+    )
     model = SecondOrderThevenin(params, dt_s)
     state = np.array([initial_soc, 0.0, 0.0], dtype=float)
     soc = np.empty(n_steps)

@@ -36,22 +36,35 @@ from battery_estimation.models import ECMParameters, SecondOrderThevenin
 def find_one(root: Path, pattern: str) -> Path:
     matches = list(root.rglob(pattern))
     if len(matches) != 1:
-        raise FileNotFoundError(f"Expected one file matching {pattern} under {root}, found {len(matches)}")
+        raise FileNotFoundError(
+            f"Expected one file matching {pattern} under {root}, found {len(matches)}"
+        )
     return matches[0]
 
 
 def run_filter(estimator, current: np.ndarray, voltage: np.ndarray | None = None):
     start = time.perf_counter()
-    values = estimator.run(current) if voltage is None else estimator.run(current, voltage)
+    values = (
+        estimator.run(current) if voltage is None else estimator.run(current, voltage)
+    )
     runtime = 1e6 * (time.perf_counter() - start) / len(current)
     return values, runtime
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Identify on CALCE DST and validate SOC estimation on independent FUDS data")
-    parser.add_argument("--data-root", type=Path, default=ROOT / "data" / "raw" / "calce")
+    parser = argparse.ArgumentParser(
+        description="Identify on CALCE DST and validate SOC estimation on independent FUDS data"
+    )
+    parser.add_argument(
+        "--data-root", type=Path, default=ROOT / "data" / "raw" / "calce"
+    )
     parser.add_argument("--output-root", type=Path, default=ROOT / "results")
-    parser.add_argument("--initial-soc-error", type=float, default=-0.10, help="SOC fraction added to the reference initial SOC")
+    parser.add_argument(
+        "--initial-soc-error",
+        type=float,
+        default=-0.10,
+        help="SOC fraction added to the reference initial SOC",
+    )
     args = parser.parse_args()
 
     ocv_path = find_one(args.data_root, "*Incremental OCV*.xlsx")
@@ -88,11 +101,15 @@ def main() -> None:
     for k in range(len(fuds.time_s)):
         # Use the independently constructed SOC reference to isolate voltage-model error.
         open_loop_state[0] = fuds.reference_soc[k]
-        open_loop_voltage[k] = model.terminal_voltage(open_loop_state, fuds.current_a[k])
+        open_loop_voltage[k] = model.terminal_voltage(
+            open_loop_state, fuds.current_a[k]
+        )
         if k + 1 < len(fuds.time_s):
             next_state = model.transition(open_loop_state, fuds.current_a[k])
             open_loop_state[1:] = next_state[1:]
-    open_loop_voltage_rmse = float(np.sqrt(np.mean((open_loop_voltage - fuds.voltage_v) ** 2)))
+    open_loop_voltage_rmse = float(
+        np.sqrt(np.mean((open_loop_voltage - fuds.voltage_v) ** 2))
+    )
     initial_soc = float(np.clip(fuds.initial_soc + args.initial_soc_error, 0.0, 1.0))
     x0 = np.array([initial_soc, 0.0, 0.0])
     p0 = np.diag([0.025, 0.003, 0.003])
@@ -101,7 +118,9 @@ def main() -> None:
 
     cc = CoulombCounter(initial_soc, capacity_ah, 1.0, 1.0)
     ekf = ExtendedKalmanFilter(model, x0, p0, q, voltage_variance)
-    ukf = UnscentedKalmanFilter(model, x0, p0, q, voltage_variance, alpha=0.2, beta=2.0, kappa=0.0)
+    ukf = UnscentedKalmanFilter(
+        model, x0, p0, q, voltage_variance, alpha=0.2, beta=2.0, kappa=0.0
+    )
     cc_soc, cc_runtime = run_filter(cc, fuds.current_a)
     ekf_states, ekf_runtime = run_filter(ekf, fuds.current_a, fuds.voltage_v)
     ukf_states, ukf_runtime = run_filter(ukf, fuds.current_a, fuds.voltage_v)
@@ -144,12 +163,24 @@ def main() -> None:
     axes[0].set_ylabel("Current [A]")
     axes[0].grid(alpha=0.25)
     axes[1].plot(fuds.time_s, fuds.voltage_v, lw=0.7, label="Measured")
-    axes[1].plot(fuds.time_s, open_loop_voltage, lw=0.7, alpha=0.8, label="2-RC open-loop")
+    axes[1].plot(
+        fuds.time_s, open_loop_voltage, lw=0.7, alpha=0.8, label="2-RC open-loop"
+    )
     axes[1].set_ylabel("Measured voltage [V]")
     axes[1].legend()
     axes[1].grid(alpha=0.25)
-    axes[2].plot(fuds.time_s, 100 * fuds.reference_soc, lw=1.4, label="Coulomb-integrated reference")
-    axes[2].plot(fuds.time_s, 100 * estimates["coulomb_counting"], lw=0.9, label="Coulomb Counting")
+    axes[2].plot(
+        fuds.time_s,
+        100 * fuds.reference_soc,
+        lw=1.4,
+        label="Coulomb-integrated reference",
+    )
+    axes[2].plot(
+        fuds.time_s,
+        100 * estimates["coulomb_counting"],
+        lw=0.9,
+        label="Coulomb Counting",
+    )
     axes[2].plot(fuds.time_s, 100 * estimates["ekf"], lw=0.9, label="EKF")
     axes[2].plot(fuds.time_s, 100 * estimates["ukf"], lw=0.9, label="UKF")
     axes[2].set_ylabel("SOC [%]")
@@ -168,9 +199,9 @@ def main() -> None:
         "Identification: DST 80% SOC at 25 C. Independent validation: FUDS 80% SOC at 25 C.",
         "",
         f"Measured initial capacity: {capacity_ah:.4f} Ah",
-        f"Reference initial SOC: {100*fuds.initial_soc:.2f}%",
-        f"Estimator initial SOC: {100*initial_soc:.2f}%",
-        f"Independent FUDS open-loop voltage RMSE: {1000*open_loop_voltage_rmse:.2f} mV",
+        f"Reference initial SOC: {100 * fuds.initial_soc:.2f}%",
+        f"Estimator initial SOC: {100 * initial_soc:.2f}%",
+        f"Independent FUDS open-loop voltage RMSE: {1000 * open_loop_voltage_rmse:.2f} mV",
         "",
         "| Method | SOC RMSE [%pt] | SOC MAE [%pt] | Max error [%pt] | Final error [%pt] | Runtime [us/sample] |",
         "|---|---:|---:|---:|---:|---:|",
@@ -181,7 +212,13 @@ def main() -> None:
             f"| {method} | {value['rmse_pct']:.3f} | {value['mae_pct']:.3f} | {value['max_error_pct']:.3f} | "
             f"{value['final_error_pct']:.3f} | {value['runtime_us_per_sample']:.2f} |"
         )
-    lines.extend(["", "The SOC reference is constructed by integrating measured current from the capacity-derived initial SOC.", ""])
+    lines.extend(
+        [
+            "",
+            "The SOC reference is constructed by integrating measured current from the capacity-derived initial SOC.",
+            "",
+        ]
+    )
     report_path = reports_dir / "calce_fuds_validation.md"
     report_path.write_text("\n".join(lines), encoding="utf-8")
     print(json.dumps(metrics, indent=2))

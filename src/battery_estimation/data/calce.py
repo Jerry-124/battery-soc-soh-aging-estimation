@@ -96,11 +96,7 @@ def load_capacity_ah(path: str | Path) -> float:
 
 
 def _is_discharge_rest(cycle: float, step: float) -> bool:
-    return bool(
-        (step == 4 and cycle == 1)
-        or step == 6
-        or (step == 8 and cycle == 10)
-    )
+    return bool((step == 4 and cycle == 1) or step == 6 or (step == 8 and cycle == 10))
 
 
 def _relaxed_ocv_point(
@@ -112,9 +108,7 @@ def _relaxed_ocv_point(
 ) -> tuple[float, float] | None:
     if not _is_discharge_rest(cycle, step):
         return None
-    duration = float(
-        group["Test_Time(s)"].iloc[-1] - group["Test_Time(s)"].iloc[0]
-    )
+    duration = float(group["Test_Time(s)"].iloc[-1] - group["Test_Time(s)"].iloc[0])
     current_mean = float(group["Current(A)"].abs().mean())
     if duration <= 1000.0 or current_mean >= 1e-3:
         return None

@@ -20,12 +20,19 @@ class ExtendedKalmanFilter:
         self.q = np.asarray(process_covariance, dtype=float).copy()
         self.r = float(voltage_variance)
 
-    def step(self, current_a: float, voltage_v: float, measurement_current_a: float | None = None) -> np.ndarray:
+    def step(
+        self,
+        current_a: float,
+        voltage_v: float,
+        measurement_current_a: float | None = None,
+    ) -> np.ndarray:
         f = self.model.state_jacobian()
         x_pred = self.model.transition(self.x, current_a)
         p_pred = f @ self.p @ f.T + self.q
         h = self.model.measurement_jacobian(x_pred)
-        measurement_current = current_a if measurement_current_a is None else measurement_current_a
+        measurement_current = (
+            current_a if measurement_current_a is None else measurement_current_a
+        )
         predicted_voltage = self.model.terminal_voltage(x_pred, measurement_current)
         innovation = float(voltage_v - predicted_voltage)
         s = float((h @ p_pred @ h.T)[0, 0] + self.r)
@@ -42,5 +49,7 @@ class ExtendedKalmanFilter:
         states = np.empty((len(current_a), 3), dtype=float)
         states[0] = self.x
         for k in range(1, len(current_a)):
-            states[k] = self.step(float(current_a[k - 1]), float(voltage_v[k]), float(current_a[k]))
+            states[k] = self.step(
+                float(current_a[k - 1]), float(voltage_v[k]), float(current_a[k])
+            )
         return states

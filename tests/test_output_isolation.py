@@ -9,7 +9,9 @@ SPEC.loader.exec_module(MODULE)
 output_directories = MODULE.output_directories
 
 
-def test_all_experiment_artifacts_live_under_requested_output_root(tmp_path: Path) -> None:
+def test_all_experiment_artifacts_live_under_requested_output_root(
+    tmp_path: Path,
+) -> None:
     root = tmp_path / "run-a"
 
     metrics_dir, figures_dir, data_dir = output_directories(root)
@@ -17,7 +19,9 @@ def test_all_experiment_artifacts_live_under_requested_output_root(tmp_path: Pat
     assert metrics_dir == root / "metrics"
     assert figures_dir == root / "figures"
     assert data_dir == root / "data" / "processed"
-    assert all(path.is_relative_to(root) for path in (metrics_dir, figures_dir, data_dir))
+    assert all(
+        path.is_relative_to(root) for path in (metrics_dir, figures_dir, data_dir)
+    )
 
 
 def test_two_output_roots_do_not_share_processed_dataset_paths(tmp_path: Path) -> None:

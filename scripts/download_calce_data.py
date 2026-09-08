@@ -36,7 +36,9 @@ def _verify_archive(path: Path, expected_sha256: str) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Download official CALCE INR18650-20R validation data")
+    parser = argparse.ArgumentParser(
+        description="Download official CALCE INR18650-20R validation data"
+    )
     parser.add_argument("--output", type=Path, default=ROOT / "data" / "raw" / "calce")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
