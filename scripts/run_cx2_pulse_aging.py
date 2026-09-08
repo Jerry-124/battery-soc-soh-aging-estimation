@@ -25,14 +25,26 @@ from battery_estimation.data.calce_cx2 import (
 
 def trailing_median(values: np.ndarray, window: int = 3) -> np.ndarray:
     """Causal robust health estimate from the latest diagnostic checkpoints."""
-    return np.array([np.median(values[max(0, i - window + 1) : i + 1]) for i in range(len(values))])
+    return np.array(
+        [np.median(values[max(0, i - window + 1) : i + 1]) for i in range(len(values))]
+    )
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Extract full-life 5-second pulse resistance and capacity fade from CALCE CX2-3")
-    parser.add_argument("--archive", type=Path, default=ROOT / "data" / "raw" / "calce_cx2" / "CX2_3.complete.zip")
+    parser = argparse.ArgumentParser(
+        description="Extract full-life 5-second pulse resistance and capacity fade from CALCE CX2-3"
+    )
+    parser.add_argument(
+        "--archive",
+        type=Path,
+        default=ROOT / "data" / "raw" / "calce_cx2" / "CX2_3.complete.zip",
+    )
     parser.add_argument("--max-cycles-per-file", type=int, default=25)
-    parser.add_argument("--reuse-records", action="store_true", help="Reuse data/processed/cx2_pulse_records.csv")
+    parser.add_argument(
+        "--reuse-records",
+        action="store_true",
+        help="Reuse data/processed/cx2_pulse_records.csv",
+    )
     parser.add_argument("--output-root", type=Path, default=ROOT / "results")
     args = parser.parse_args()
     cached_records = ROOT / "data" / "processed" / "cx2_pulse_records.csv"
@@ -61,19 +73,38 @@ def main() -> None:
             "initial_capacity_ah": float(aging["capacity_ah"].iloc[0]),
             "final_capacity_ah": float(aging["capacity_ah"].iloc[-1]),
             "final_capacity_factor": true_capacity_factor,
-            "initial_5s_pulse_resistance_ohm": float(aging["pulse_resistance_ohm"].iloc[0]),
-            "final_5s_pulse_resistance_ohm": float(aging["pulse_resistance_ohm"].iloc[-1]),
+            "initial_5s_pulse_resistance_ohm": float(
+                aging["pulse_resistance_ohm"].iloc[0]
+            ),
+            "final_5s_pulse_resistance_ohm": float(
+                aging["pulse_resistance_ohm"].iloc[-1]
+            ),
             "final_resistance_factor": true_resistance_factor,
         },
         "estimated_health": {
             "method": "causal trailing median of 3 diagnostic checkpoints",
-            "capacity_rmse_pct": float(np.sqrt(np.mean((cap_estimate - aging["capacity_soh_pct"].to_numpy()) ** 2))),
-            "resistance_factor_rmse": float(np.sqrt(np.mean((resistance_estimate - aging["resistance_factor"].to_numpy()) ** 2))),
+            "capacity_rmse_pct": float(
+                np.sqrt(
+                    np.mean((cap_estimate - aging["capacity_soh_pct"].to_numpy()) ** 2)
+                )
+            ),
+            "resistance_factor_rmse": float(
+                np.sqrt(
+                    np.mean(
+                        (resistance_estimate - aging["resistance_factor"].to_numpy())
+                        ** 2
+                    )
+                )
+            ),
         },
         "observer_checkpoint": {
             "timestamp": aging.loc[target_index, "timestamp"].isoformat(),
-            "true_capacity_factor": float(aging.loc[target_index, "capacity_soh_pct"] / 100.0),
-            "true_resistance_factor": float(aging.loc[target_index, "resistance_factor"]),
+            "true_capacity_factor": float(
+                aging.loc[target_index, "capacity_soh_pct"] / 100.0
+            ),
+            "true_resistance_factor": float(
+                aging.loc[target_index, "resistance_factor"]
+            ),
             "estimated_capacity_factor": float(cap_estimate[target_index] / 100.0),
             "estimated_resistance_factor": float(resistance_estimate[target_index]),
         },
@@ -93,18 +124,39 @@ def main() -> None:
     records.to_csv(processed_dir / "cx2_pulse_records.csv", index=False)
 
     fig, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
-    axes[0].plot(aging["elapsed_days"], aging["capacity_soh_pct"], "o-", ms=3, label="Measured median")
-    axes[0].plot(aging["elapsed_days"], cap_estimate, "--", label="Causal 3-checkpoint estimate")
+    axes[0].plot(
+        aging["elapsed_days"],
+        aging["capacity_soh_pct"],
+        "o-",
+        ms=3,
+        label="Measured median",
+    )
+    axes[0].plot(
+        aging["elapsed_days"], cap_estimate, "--", label="Causal 3-checkpoint estimate"
+    )
     axes[0].set_ylabel("Capacity SOH [%]")
     axes[0].grid(alpha=0.25)
     axes[0].legend()
-    axes[1].plot(aging["elapsed_days"], aging["resistance_factor"], "o-", ms=3, label="Measured 5 s pulse")
-    axes[1].plot(aging["elapsed_days"], resistance_estimate, "--", label="Causal 3-checkpoint estimate")
+    axes[1].plot(
+        aging["elapsed_days"],
+        aging["resistance_factor"],
+        "o-",
+        ms=3,
+        label="Measured 5 s pulse",
+    )
+    axes[1].plot(
+        aging["elapsed_days"],
+        resistance_estimate,
+        "--",
+        label="Causal 3-checkpoint estimate",
+    )
     axes[1].set_ylabel("Resistance factor")
     axes[1].set_xlabel("Elapsed test days")
     axes[1].grid(alpha=0.25)
     axes[1].legend()
-    fig.suptitle("CALCE CX2-3 measured capacity fade and 5-second pulse resistance growth")
+    fig.suptitle(
+        "CALCE CX2-3 measured capacity fade and 5-second pulse resistance growth"
+    )
     fig.tight_layout()
     figure_path = figures_dir / "cx2_pulse_aging.png"
     fig.savefig(figure_path, dpi=160)

@@ -6,9 +6,13 @@ from pathlib import Path
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate a Markdown benchmark report from JSON metrics")
+    parser = argparse.ArgumentParser(
+        description="Generate a Markdown benchmark report from JSON metrics"
+    )
     parser.add_argument("--results", type=Path, default=Path("results/metrics"))
-    parser.add_argument("--output", type=Path, default=Path("results/reports/benchmark.md"))
+    parser.add_argument(
+        "--output", type=Path, default=Path("results/reports/benchmark.md")
+    )
     args = parser.parse_args()
     rows = []
     for path in sorted(args.results.glob("synthetic_*benchmark.json")):

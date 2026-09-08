@@ -13,8 +13,12 @@ CALCE_HOSTS = {"web.calce.umd.edu"}
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Download and verify the official CALCE CX2-3 archive")
-    parser.add_argument("--output", type=Path, default=ROOT / "data/raw/calce_cx2/CX2_3.complete.zip")
+    parser = argparse.ArgumentParser(
+        description="Download and verify the official CALCE CX2-3 archive"
+    )
+    parser.add_argument(
+        "--output", type=Path, default=ROOT / "data/raw/calce_cx2/CX2_3.complete.zip"
+    )
     args = parser.parse_args()
     temporary = args.output.with_suffix(args.output.suffix + ".part")
     result = download_https(

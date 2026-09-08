@@ -117,8 +117,7 @@ def build_metrics(trajectories) -> dict:
             "final_resistance_factor_mean": float(
                 np.nanmean(
                     [
-                        t.effective_resistance_ohm[-1]
-                        / t.effective_resistance_ohm[0]
+                        t.effective_resistance_ohm[-1] / t.effective_resistance_ohm[0]
                         for t in trajectories
                     ]
                 )

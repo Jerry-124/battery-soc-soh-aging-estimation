@@ -55,18 +55,13 @@ def _response_lookup(
     tau_grid: np.ndarray,
 ) -> dict[float, np.ndarray]:
     return {
-        float(tau): _filtered_current(current, dt_s, float(tau))
-        for tau in tau_grid
+        float(tau): _filtered_current(current, dt_s, float(tau)) for tau in tau_grid
     }
 
 
 def _physically_valid(coefficients: np.ndarray) -> bool:
     r0, r1, r2, _ = coefficients
-    return bool(
-        0.001 <= r0 <= 0.20
-        and 0.0002 <= r1 <= 0.30
-        and 0.0002 <= r2 <= 0.30
-    )
+    return bool(0.001 <= r0 <= 0.20 and 0.0002 <= r1 <= 0.30 and 0.0002 <= r2 <= 0.30)
 
 
 def _evaluate_candidate(
@@ -79,9 +74,7 @@ def _evaluate_candidate(
 ) -> _FitCandidate | None:
     if tau2 <= 1.5 * tau1:
         return None
-    design = np.column_stack(
-        [current, response1, response2, np.ones(len(current))]
-    )
+    design = np.column_stack([current, response1, response2, np.ones(len(current))])
     coefficients, *_ = np.linalg.lstsq(design, target, rcond=None)
     if not _physically_valid(coefficients):
         return None

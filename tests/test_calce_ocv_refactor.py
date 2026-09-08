@@ -15,7 +15,9 @@ def _synthetic_relaxation_data() -> pd.DataFrame:
         discharged = 0.2 * index
         voltage = 4.20 - 0.14 * index
         if index == 4:
-            voltage += 0.03  # small measurement bump should be made monotonic after sorting
+            voltage += (
+                0.03  # small measurement bump should be made monotonic after sorting
+            )
         start = 2000.0 * index
         for offset in (0.0, 1201.0):
             rows.append(
@@ -58,4 +60,6 @@ def test_relaxed_ocv_point_rejects_short_or_loaded_rest() -> None:
     loaded["Current(A)"] = [0.01, 0.01]
 
     assert calce._relaxed_ocv_point(short, cycle=2.0, step=6.0, capacity_ah=1.4) is None
-    assert calce._relaxed_ocv_point(loaded, cycle=2.0, step=6.0, capacity_ah=1.4) is None
+    assert (
+        calce._relaxed_ocv_point(loaded, cycle=2.0, step=6.0, capacity_ah=1.4) is None
+    )

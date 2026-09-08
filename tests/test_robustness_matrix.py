@@ -34,7 +34,9 @@ def _base_rows() -> list[dict]:
                         "category": category,
                         "level": "b",
                         "observer": observer,
-                        "post_300s_rmse_pct": float(category_index + observer_index + 2),
+                        "post_300s_rmse_pct": float(
+                            category_index + observer_index + 2
+                        ),
                     },
                 ]
             )

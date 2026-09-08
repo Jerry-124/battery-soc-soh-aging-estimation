@@ -9,7 +9,9 @@ def identify_ohmic_resistance(delta_voltage_v: float, delta_current_a: float) ->
     return abs(delta_voltage_v / delta_current_a)
 
 
-def identify_relaxation_grid(time_s: np.ndarray, polarization_v: np.ndarray) -> dict[str, float]:
+def identify_relaxation_grid(
+    time_s: np.ndarray, polarization_v: np.ndarray
+) -> dict[str, float]:
     """Fit V(t)=A1*exp(-t/tau1)+A2*exp(-t/tau2) using a NumPy-only grid search."""
     t = np.asarray(time_s, dtype=float)
     y = np.asarray(polarization_v, dtype=float)

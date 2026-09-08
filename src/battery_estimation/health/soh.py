@@ -17,7 +17,8 @@ def adapt_parameters(
     estimated_resistance_factor: float,
 ) -> ECMParameters:
     """Bound slow health estimates before applying them to the fast observer."""
-    capacity_factor = min(1.05, max(0.50, estimated_capacity_ah / reference.capacity_ah))
+    capacity_factor = min(
+        1.05, max(0.50, estimated_capacity_ah / reference.capacity_ah)
+    )
     resistance_factor = min(3.0, max(0.70, estimated_resistance_factor))
     return reference.aged(capacity_factor, resistance_factor)
-

@@ -3,7 +3,9 @@ from __future__ import annotations
 import numpy as np
 
 
-def calculate_metrics(reference: np.ndarray, estimate: np.ndarray, dt_s: float) -> dict[str, float | None]:
+def calculate_metrics(
+    reference: np.ndarray, estimate: np.ndarray, dt_s: float
+) -> dict[str, float | None]:
     error = np.asarray(estimate) - np.asarray(reference)
     abs_error = np.abs(error)
     within = np.flatnonzero(abs_error <= 0.02)
