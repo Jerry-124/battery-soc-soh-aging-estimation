@@ -26,15 +26,14 @@ class OCVCurve:
         return float(value) if value.ndim == 0 else value
 
     def derivative(self, soc: np.ndarray | float) -> np.ndarray | float:
-        slopes = np.gradient(self.voltage_v, self.soc)
-        # A small positive floor avoids an unobservable/unstable EKF Jacobian.
-        slopes = np.maximum(slopes, 0.02)
+        # np.interp is piecewise linear, so its derivative is the slope of the
+        # active segment (with the first/last segment used at clipped bounds).
+        slopes = np.diff(self.voltage_v) / np.diff(self.soc)
         z = np.asarray(soc, dtype=float)
-        value = np.interp(
-            np.clip(z, self.soc[0], self.soc[-1]),
-            self.soc,
-            slopes,
-        )
+        clipped = np.clip(z, self.soc[0], self.soc[-1])
+        segment = np.searchsorted(self.soc, clipped, side="right") - 1
+        segment = np.clip(segment, 0, len(slopes) - 1)
+        value = slopes[segment]
         return float(value) if value.ndim == 0 else value
 
     def with_bias(self, voltage_bias_v: float) -> OCVCurve:
