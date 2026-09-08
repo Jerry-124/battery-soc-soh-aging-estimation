@@ -51,6 +51,27 @@ def run_filter(estimator, current: np.ndarray, voltage: np.ndarray | None = None
     return values, runtime
 
 
+def voltage_model_diagnostics(model, profile):
+    """Return voltage traces without and with reference-SOC conditioning."""
+    full_state = np.array([profile.initial_soc, 0.0, 0.0])
+    conditioned_state = np.array([profile.initial_soc, 0.0, 0.0])
+    full_state_voltage = np.empty(len(profile.time_s))
+    conditioned_voltage = np.empty(len(profile.time_s))
+    for k in range(len(profile.time_s)):
+        full_state_voltage[k] = model.terminal_voltage(full_state, profile.current_a[k])
+        conditioned_state[0] = profile.reference_soc[k]
+        conditioned_voltage[k] = model.terminal_voltage(
+            conditioned_state, profile.current_a[k]
+        )
+        if k + 1 < len(profile.time_s):
+            full_state = model.transition(full_state, profile.current_a[k])
+            next_conditioned_state = model.transition(
+                conditioned_state, profile.current_a[k]
+            )
+            conditioned_state[1:] = next_conditioned_state[1:]
+    return full_state_voltage, conditioned_voltage
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Identify on CALCE DST and validate SOC estimation on independent FUDS data"
@@ -96,19 +117,14 @@ def main() -> None:
         c2=fit.c2,
     )
     model = SecondOrderThevenin(params, 1.0, fitted_ocv, fitted_ocv.derivative)
-    open_loop_state = np.array([fuds.initial_soc, 0.0, 0.0])
-    open_loop_voltage = np.empty(len(fuds.time_s))
-    for k in range(len(fuds.time_s)):
-        # Use the independently constructed SOC reference to isolate voltage-model error.
-        open_loop_state[0] = fuds.reference_soc[k]
-        open_loop_voltage[k] = model.terminal_voltage(
-            open_loop_state, fuds.current_a[k]
-        )
-        if k + 1 < len(fuds.time_s):
-            next_state = model.transition(open_loop_state, fuds.current_a[k])
-            open_loop_state[1:] = next_state[1:]
-    open_loop_voltage_rmse = float(
-        np.sqrt(np.mean((open_loop_voltage - fuds.voltage_v) ** 2))
+    full_state_open_loop_voltage, reference_soc_conditioned_voltage = (
+        voltage_model_diagnostics(model, fuds)
+    )
+    full_state_open_loop_voltage_rmse = float(
+        np.sqrt(np.mean((full_state_open_loop_voltage - fuds.voltage_v) ** 2))
+    )
+    reference_soc_conditioned_voltage_rmse = float(
+        np.sqrt(np.mean((reference_soc_conditioned_voltage - fuds.voltage_v) ** 2))
     )
     initial_soc = float(np.clip(fuds.initial_soc + args.initial_soc_error, 0.0, 1.0))
     x0 = np.array([initial_soc, 0.0, 0.0])
@@ -129,7 +145,11 @@ def main() -> None:
         "ekf": ekf_states[:, 0],
         "ukf": ukf_states[:, 0],
     }
-    runtimes = {"coulomb_counting": cc_runtime, "ekf": ekf_runtime, "ukf": ukf_runtime}
+    runtimes = {
+        "coulomb_counting": cc_runtime,
+        "ekf": ekf_runtime,
+        "ukf": ukf_runtime,
+    }
     metrics: dict[str, object] = {
         "dataset": {
             "publisher": "CALCE, University of Maryland",
@@ -141,7 +161,10 @@ def main() -> None:
             "reference_initial_soc": fuds.initial_soc,
             "estimator_initial_soc": initial_soc,
             "samples": len(fuds.time_s),
-            "open_loop_voltage_rmse_v": open_loop_voltage_rmse,
+            "full_state_open_loop_voltage_rmse_v": full_state_open_loop_voltage_rmse,
+            "reference_soc_conditioned_voltage_rmse_v": (
+                reference_soc_conditioned_voltage_rmse
+            ),
         },
         "identified_parameters": asdict(fit),
     }
@@ -164,7 +187,18 @@ def main() -> None:
     axes[0].grid(alpha=0.25)
     axes[1].plot(fuds.time_s, fuds.voltage_v, lw=0.7, label="Measured")
     axes[1].plot(
-        fuds.time_s, open_loop_voltage, lw=0.7, alpha=0.8, label="2-RC open-loop"
+        fuds.time_s,
+        full_state_open_loop_voltage,
+        lw=0.7,
+        alpha=0.8,
+        label="2-RC full-state open-loop",
+    )
+    axes[1].plot(
+        fuds.time_s,
+        reference_soc_conditioned_voltage,
+        lw=0.7,
+        alpha=0.7,
+        label="2-RC reference-SOC-conditioned",
     )
     axes[1].set_ylabel("Measured voltage [V]")
     axes[1].legend()
@@ -201,7 +235,14 @@ def main() -> None:
         f"Measured initial capacity: {capacity_ah:.4f} Ah",
         f"Reference initial SOC: {100 * fuds.initial_soc:.2f}%",
         f"Estimator initial SOC: {100 * initial_soc:.2f}%",
-        f"Independent FUDS open-loop voltage RMSE: {1000 * open_loop_voltage_rmse:.2f} mV",
+        (
+            "Independent FUDS full-state open-loop voltage RMSE: "
+            f"{1000 * full_state_open_loop_voltage_rmse:.2f} mV"
+        ),
+        (
+            "Independent FUDS reference-SOC-conditioned voltage RMSE: "
+            f"{1000 * reference_soc_conditioned_voltage_rmse:.2f} mV"
+        ),
         "",
         "| Method | SOC RMSE [%pt] | SOC MAE [%pt] | Max error [%pt] | Final error [%pt] | Runtime [us/sample] |",
         "|---|---:|---:|---:|---:|---:|",
