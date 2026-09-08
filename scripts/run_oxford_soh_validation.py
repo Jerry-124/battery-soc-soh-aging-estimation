@@ -58,20 +58,25 @@ def parse_args() -> argparse.Namespace:
 
 def output_directories(output_root: Path) -> dict[str, Path]:
     """Return all experiment outputs under one isolated root."""
+    processed = (
+        ROOT / "data" / "processed"
+        if output_root.resolve() == (ROOT / "results").resolve()
+        else output_root / "data" / "processed"
+    )
     return {
         "metrics": output_root / "metrics",
         "figures": output_root / "figures",
         "reports": output_root / "reports",
-        "processed": output_root / "data" / "processed",
+        "processed": processed,
     }
 
 
 def _prediction_summary(trajectories) -> dict[str, float | int]:
     linear_errors = np.concatenate(
-        [prediction_errors(t.cycle, t.capacity_soh_pct, 1) for t in trajectories]
+        [prediction_errors(t.cycle, t.capacity_retention_pct, 1) for t in trajectories]
     )
     quadratic_errors = np.concatenate(
-        [prediction_errors(t.cycle, t.capacity_soh_pct, 2) for t in trajectories]
+        [prediction_errors(t.cycle, t.capacity_retention_pct, 2) for t in trajectories]
     )
     return {
         "train_fraction": 0.6,
@@ -100,14 +105,23 @@ def build_metrics(trajectories) -> dict:
             "initial_capacity_mah_std": float(
                 np.std([t.capacity_mah[0] for t in trajectories])
             ),
-            "final_soh_pct_mean": float(
-                np.mean([t.capacity_soh_pct[-1] for t in trajectories])
+            "final_capacity_retention_pct_mean": float(
+                np.mean([t.capacity_retention_pct[-1] for t in trajectories])
             ),
-            "final_soh_pct_min": float(
-                np.min([t.capacity_soh_pct[-1] for t in trajectories])
+            "final_capacity_retention_pct_min": float(
+                np.min([t.capacity_retention_pct[-1] for t in trajectories])
             ),
-            "final_soh_pct_max": float(
-                np.max([t.capacity_soh_pct[-1] for t in trajectories])
+            "final_capacity_retention_pct_max": float(
+                np.max([t.capacity_retention_pct[-1] for t in trajectories])
+            ),
+            "final_rated_capacity_soh_pct_mean": float(
+                np.mean([t.rated_capacity_soh_pct[-1] for t in trajectories])
+            ),
+            "final_rated_capacity_soh_pct_min": float(
+                np.min([t.rated_capacity_soh_pct[-1] for t in trajectories])
+            ),
+            "final_rated_capacity_soh_pct_max": float(
+                np.max([t.rated_capacity_soh_pct[-1] for t in trajectories])
             ),
         },
         "resistance": {
@@ -131,7 +145,12 @@ def build_metrics(trajectories) -> dict:
             "measurements": len(trajectory.cycle),
             "last_cycle": int(trajectory.cycle[-1]),
             "initial_capacity_mah": float(trajectory.capacity_mah[0]),
-            "final_capacity_soh_pct": float(trajectory.capacity_soh_pct[-1]),
+            "final_capacity_retention_pct": float(
+                trajectory.capacity_retention_pct[-1]
+            ),
+            "final_rated_capacity_soh_pct": float(
+                trajectory.rated_capacity_soh_pct[-1]
+            ),
             "final_resistance_factor": float(
                 trajectory.effective_resistance_ohm[-1]
                 / trajectory.effective_resistance_ohm[0]
@@ -159,7 +178,8 @@ def write_metrics_and_data(
                 "cell",
                 "cycle",
                 "capacity_mah",
-                "capacity_soh_pct",
+                "capacity_retention_pct",
+                "rated_capacity_soh_pct",
                 "effective_resistance_ohm",
                 "resistance_soh_pct",
             ]
@@ -170,7 +190,8 @@ def write_metrics_and_data(
                     [trajectory.cell] * len(trajectory.cycle),
                     trajectory.cycle,
                     trajectory.capacity_mah,
-                    trajectory.capacity_soh_pct,
+                    trajectory.capacity_retention_pct,
+                    trajectory.rated_capacity_soh_pct,
                     trajectory.effective_resistance_ohm,
                     trajectory.resistance_soh_pct,
                     strict=True,
@@ -183,7 +204,7 @@ def plot_validation(trajectories, output_path: Path) -> None:
     for trajectory in trajectories:
         axes[0].plot(
             trajectory.cycle,
-            trajectory.capacity_soh_pct,
+            trajectory.capacity_retention_pct,
             marker="o",
             ms=2,
             lw=1,
@@ -202,8 +223,8 @@ def plot_validation(trajectories, output_path: Path) -> None:
             lw=1,
             label=trajectory.cell,
         )
-    axes[0].axhline(80.0, color="black", ls="--", lw=1, label="80% SOH")
-    axes[0].set_ylabel("Capacity SOH [%]")
+    axes[0].axhline(80.0, color="black", ls="--", lw=1, label="80% retention")
+    axes[0].set_ylabel("Capacity retention [% of initial]")
     axes[0].set_xlabel("Equivalent full cycles")
     axes[0].grid(alpha=0.25)
     axes[0].legend(ncol=3)
@@ -225,13 +246,15 @@ def report_lines(metrics: dict) -> list[str]:
         "Eight 740 mAh pouch cells, characterized every 100 cycles at 40 C.",
         "",
         f"- Mean initial measured capacity: {metrics['capacity']['initial_capacity_mah_mean']:.2f} mAh",
-        f"- Mean final capacity SOH: {metrics['capacity']['final_soh_pct_mean']:.2f}%",
+        f"- Mean final capacity retention: {metrics['capacity']['final_capacity_retention_pct_mean']:.2f}% of initial measured capacity",
+        f"- Mean final rated-capacity SOH: {metrics['capacity']['final_rated_capacity_soh_pct_mean']:.2f}% of 740 mAh rated capacity",
         f"- Mean final resistance factor: {metrics['resistance']['final_resistance_factor_mean']:.3f}x",
         f"- Linear 60/40 holdout RMSE: {holdout['linear_rmse_pct']:.3f} percentage points",
         f"- Quadratic 60/40 holdout RMSE: {holdout['quadratic_rmse_pct']:.3f} percentage points",
         "",
         (
-            "Capacity is measured from the 1C discharge characterization. Effective "
+            "Capacity retention is relative to each cell's first measured 1C discharge "
+            "capacity. Rated-capacity SOH is `capacity_mAh / 740 mAh * 100`. Effective "
             "resistance is estimated from the voltage difference between aligned 1C "
             "and pseudo-OCV discharge curves over 20-80% depth of discharge."
         ),
