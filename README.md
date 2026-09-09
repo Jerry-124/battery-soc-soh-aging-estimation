@@ -1,9 +1,9 @@
 # Battery SOC/SOH Estimation with EKF/UKF and Aging-Aware Modeling
 
-[![Version](https://img.shields.io/badge/version-v1.1.1-blueviolet)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v1.1.2-blueviolet)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](#quick-start)
 [![CI](https://github.com/Jerry-124/battery-soc-soh-aging-estimation/actions/workflows/ci.yml/badge.svg)](https://github.com/Jerry-124/battery-soc-soh-aging-estimation/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-31-brightgreen)](#verification)
+[![Tests](https://img.shields.io/badge/tests-34-brightgreen)](#verification)
 
 A reproducible Battery Management System (BMS) research project for lithium-ion battery modeling, State of Charge (SOC) estimation, State of Health (SOH) tracking, and aging-aware observer adaptation. The repository combines synthetic benchmarks with public CALCE and Oxford measured-data validation and keeps measured, synthetic, and semi-empirical claims explicitly separated.
 
@@ -54,6 +54,8 @@ SOH_Q=\frac{Q}{Q_{rated}}.
 ```
 
 For the Oxford dataset, `capacity_retention_pct` is normalized by each cell's first measured characterization, while `rated_capacity_soh_pct` uses the 740 mAh rated capacity. These quantities are reported separately and are not treated as interchangeable labels.
+
+For CALCE CX2-3, the full-life capacity ratio is likewise named `capacity_retention_pct` because it is normalized to the first measured diagnostic capacity rather than to a rated-capacity denominator.
 
 Resistance growth is tracked independently through a resistance factor or resistance-based health indicator, depending on the experiment.
 
@@ -114,9 +116,11 @@ Dataset downloaders validate HTTPS hosts and redirect destinations and verify ex
 
 ## Verification
 
-The current suite contains **31 pytest tests**. GitHub Actions validates Python 3.10 and 3.12 and runs dependency checks, source compilation, pytest, Ruff linting, and Ruff formatting checks.
+The current suite contains **34 pytest tests**. GitHub Actions validates Python 3.10 and 3.12 and runs dependency checks, source compilation, pytest, Ruff linting, and Ruff formatting checks.
 
-Regression coverage includes estimator recovery, physical parameter validation, measured-data parsing, download security, ECM fitting, robustness aggregation, exact piecewise-linear OCV derivative semantics, true full-state open-loop voltage propagation, reference-SOC-conditioned diagnostics, and Oxford retention/rated-SOH denominator definitions.
+Regression coverage includes estimator recovery, finite physical-parameter validation, measured-data parsing, download security, ECM fitting, robustness aggregation, exact piecewise-linear OCV derivative semantics, true full-state open-loop voltage propagation, reference-SOC-conditioned diagnostics, Oxford retention/rated-SOH denominator definitions, CX2 capacity-retention naming, custom-output isolation, and the public Markdown report-generator contract.
+
+SOC accuracy metrics expose `first_within_2pct_s`, defined as the first sample at which absolute SOC error is no greater than two percentage points. It is intentionally not labeled as persistent convergence time.
 
 ## Synthetic Results
 
@@ -247,7 +251,7 @@ battery-soc-soh-aging-estimation/
 |   |-- health/                    # Health metrics and adaptation
 |   |-- identification/            # Pulse-relaxation fitting
 |   `-- evaluation/                # Accuracy and voltage metrics
-|-- tests/                         # 31 automated tests
+|-- tests/                         # 34 automated tests
 `-- results/
     |-- metrics/                   # Machine-readable outputs
     |-- reports/                   # Human-readable summaries
@@ -262,7 +266,7 @@ The current scope covers cell-level lumped electrical modeling, SOC estimation, 
 
 ## Development Roadmap
 
-Completed work includes the 2-RC ECM, Coulomb Counting/EKF/UKF, measured CALCE and Oxford validation, full-life CX2-3 aging analysis, aging-aware observer feedback, robustness matrices, physical input validation, secure dataset download checks, and the v1.1.1 scientific-semantics corrections.
+Completed work includes the 2-RC ECM, Coulomb Counting/EKF/UKF, measured CALCE and Oxford validation, full-life CX2-3 aging analysis, aging-aware observer feedback, robustness matrices, physical input validation, secure dataset download checks, the v1.1.1 scientific-semantics corrections, and the v1.1.2 reproducibility/terminology consistency patch.
 
 Potential extensions include SOC-dependent ECM parameter maps, stricter cross-cell identification/validation splits, temperature-dependent parameters, joint online SOC-SOH estimation, and broader measured dynamic-profile comparisons.
 
