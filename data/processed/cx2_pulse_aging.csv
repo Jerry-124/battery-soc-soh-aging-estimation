@@ -1,4 +1,4 @@
-source_file,timestamp,cycles_sampled,capacity_ah,pulse_resistance_ohm,incremental_resistance_ohm,elapsed_days,capacity_soh_pct,resistance_factor,capacity_soh_estimate_pct,resistance_factor_estimate
+source_file,timestamp,cycles_sampled,capacity_ah,pulse_resistance_ohm,incremental_resistance_ohm,elapsed_days,capacity_retention_pct,resistance_factor,capacity_retention_estimate_pct,resistance_factor_estimate
 CX2_3/cx2_3_9_20_10.xlsx,2010-09-17 22:40:09.000,1,1.385125864325351,0.1150278492889833,0.1170687062014254,0.0,100.0,1.0,100.0,1.0
 CX2_3/cx2_3_9_24_10.xlsx,2010-09-22 08:47:00.500,8,1.3776022565027173,0.11754901806369995,0.1192637725302936,4.421429398148148,99.45682858024615,1.0219178989288302,99.72841429012308,1.0109589494644151
 CX2_3/cx2_3_9_29_10.xlsx,2010-09-26 13:34:39.000,17,1.3715584425984415,0.1106751645945629,0.1117801684250513,8.621180555555556,99.02049177794267,0.9621597315665253,99.45682858024615,1.0
