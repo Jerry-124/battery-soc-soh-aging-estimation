@@ -240,25 +240,44 @@ def plot_validation(trajectories, output_path: Path) -> None:
 
 def report_lines(metrics: dict) -> list[str]:
     holdout = metrics["holdout_prediction"]
+    capacity = metrics["capacity"]
+    resistance = metrics["resistance"]
     return [
-        "# Oxford Measured SOH Validation",
+        "# Oxford Measured Aging Validation",
         "",
-        "Eight 740 mAh pouch cells, characterized every 100 cycles at 40 C.",
-        "",
-        f"- Mean initial measured capacity: {metrics['capacity']['initial_capacity_mah_mean']:.2f} mAh",
-        f"- Mean final capacity retention: {metrics['capacity']['final_capacity_retention_pct_mean']:.2f}% of initial measured capacity",
-        f"- Mean final rated-capacity SOH: {metrics['capacity']['final_rated_capacity_soh_pct_mean']:.2f}% of 740 mAh rated capacity",
-        f"- Mean final resistance factor: {metrics['resistance']['final_resistance_factor_mean']:.3f}x",
-        f"- Linear 60/40 holdout RMSE: {holdout['linear_rmse_pct']:.3f} percentage points",
-        f"- Quadratic 60/40 holdout RMSE: {holdout['quadratic_rmse_pct']:.3f} percentage points",
+        "## Scope",
         "",
         (
-            "Capacity retention is relative to each cell's first measured 1C discharge "
-            "capacity. Rated-capacity SOH is `capacity_mAh / 740 mAh * 100`. Effective "
-            "resistance is estimated from the voltage difference between aligned 1C "
-            "and pseudo-OCV discharge curves over 20-80% depth of discharge."
+            "Eight 740 mAh Kokam pouch cells are evaluated using the Oxford Battery "
+            "Degradation Dataset 1. Characterization is performed every 100 cycles at "
+            "40 °C."
         ),
         "",
+        "## Key Results",
+        "",
+        "| Quantity | Value |",
+        "|---|---:|",
+        f"| Mean initial measured capacity | {capacity['initial_capacity_mah_mean']:.2f} mAh |",
+        f"| Mean final capacity retention | {capacity['final_capacity_retention_pct_mean']:.2f}% of first measured capacity |",
+        f"| Mean final rated-capacity SOH | {capacity['final_rated_capacity_soh_pct_mean']:.2f}% of 740 mAh |",
+        f"| Mean final resistance factor | {resistance['final_resistance_factor_mean']:.3f}× |",
+        f"| Linear 60/40 holdout RMSE | {holdout['linear_rmse_pct']:.3f} %pt |",
+        f"| Quadratic 60/40 holdout RMSE | {holdout['quadratic_rmse_pct']:.3f} %pt |",
+        "",
+        "## Interpretation",
+        "",
+        (
+            "Capacity retention is normalized by each cell's first measured 1C "
+            "discharge capacity. Rated-capacity SOH is calculated separately as "
+            "`capacity_mAh / 740 mAh * 100`. Effective resistance is estimated from the "
+            "voltage difference between aligned 1C and pseudo-OCV discharge curves over "
+            "20–80% depth of discharge."
+        ),
+        "",
+        (
+            "The two capacity metrics intentionally use different denominators and are "
+            "not treated as interchangeable definitions of SOH."
+        ),
     ]
 
 
