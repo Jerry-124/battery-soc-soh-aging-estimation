@@ -66,10 +66,13 @@ class TestECM(unittest.TestCase):
             (np.nan, 1.0),
             (1.0, np.inf),
         ):
-            with self.subTest(
-                capacity_factor=capacity_factor,
-                resistance_factor=resistance_factor,
-            ), self.assertRaises(ValueError):
+            with (
+                self.subTest(
+                    capacity_factor=capacity_factor,
+                    resistance_factor=resistance_factor,
+                ),
+                self.assertRaises(ValueError),
+            ):
                 ECMParameters().aged(capacity_factor, resistance_factor)
 
     def test_invalid_synthetic_inputs_are_rejected(self):

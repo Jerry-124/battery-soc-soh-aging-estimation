@@ -24,7 +24,9 @@ def build_report(results: Path) -> str:
         for method in ("coulomb_counting", "ekf", "ukf"):
             value = data[method]
             first_within = value["first_within_2pct_s"]
-            first_within_text = "N/A" if first_within is None else f"{first_within:.0f} s"
+            first_within_text = (
+                "N/A" if first_within is None else f"{first_within:.0f} s"
+            )
             rows.append(
                 f"| {scenario} | {METHOD_LABELS[method]} | {value['rmse_pct']:.3f} %pt | "
                 f"{value['mae_pct']:.3f} %pt | {value['max_error_pct']:.3f} %pt | "
