@@ -28,7 +28,7 @@
     "mae_pct": 9.532975629299461,
     "max_error_pct": 10.000000000000043,
     "final_error_pct": -1.557810259371991,
-    "convergence_s": 11181.0,
+    "first_within_2pct_s": 11181.0,
     "runtime_us_per_sample": 9.63665743768927
   },
   "ekf": {
@@ -36,7 +36,7 @@
     "mae_pct": 0.6169550159054454,
     "max_error_pct": 9.999999999999998,
     "final_error_pct": -0.8821611805158724,
-    "convergence_s": 1.0,
+    "first_within_2pct_s": 1.0,
     "runtime_us_per_sample": 188.72092669837542
   },
   "ukf": {
@@ -44,7 +44,7 @@
     "mae_pct": 0.717113686926955,
     "max_error_pct": 9.999999999999998,
     "final_error_pct": -0.8561195762889319,
-    "convergence_s": 2.0,
+    "first_within_2pct_s": 2.0,
     "runtime_us_per_sample": 376.776787785401
   }
 }
