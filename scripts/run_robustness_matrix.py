@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import sys
@@ -12,7 +13,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
 from battery_estimation.data.synthetic import simulate_dataset
 from battery_estimation.evaluation import calculate_metrics
@@ -31,6 +34,11 @@ NOISE_CASES = (
     ("high", 0.010, 0.030),
     ("severe", 0.020, 0.060),
 )
+CATEGORY_LABELS = {
+    "initial_soc_error": "Initial SOC error",
+    "measurement_noise": "Measurement noise",
+    "parameter_uncertainty": "Parameter uncertainty",
+}
 
 
 def score(
@@ -258,19 +266,57 @@ def _save_figure(path: Path, rows: list[dict]) -> None:
     plt.close(fig)
 
 
+def report_lines(summary: dict) -> list[str]:
+    lines = [
+        "# Robustness Matrix",
+        "",
+        "## Scope",
+        "",
+        (
+            "All cases use the same measured-aging-informed checkpoint and an "
+            "independent synthetic dynamic profile. Each uncertainty family is varied "
+            "separately."
+        ),
+        "",
+        "## Key Results",
+        "",
+        (
+            "| Uncertainty Family | EKF Mean Post-300 s RMSE | "
+            "EKF Worst Post-300 s RMSE | UKF Mean Post-300 s RMSE | "
+            "UKF Worst Post-300 s RMSE |"
+        ),
+        "|---|---:|---:|---:|---:|",
+    ]
+    for category in CATEGORIES:
+        ekf = summary[category]["ekf"]
+        ukf = summary[category]["ukf"]
+        lines.append(
+            f"| {CATEGORY_LABELS[category]} | "
+            f"{ekf['mean_post_300s_rmse_pct']:.3f} %pt | "
+            f"{ekf['worst_post_300s_rmse_pct']:.3f} %pt | "
+            f"{ukf['mean_post_300s_rmse_pct']:.3f} %pt | "
+            f"{ukf['worst_post_300s_rmse_pct']:.3f} %pt |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Interpretation",
+            "",
+            (
+                "Initial-SOC and measurement-noise perturbations remain comparatively "
+                "well controlled after convergence. Parameter uncertainty is "
+                "substantially more damaging and is intentionally retained in the "
+                "benchmark because it quantifies the motivation for better "
+                "identification and aging-aware adaptation."
+            ),
+        ]
+    )
+    return lines
+
+
 def _write_report(path: Path, summary: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    report = [
-        "# Robustness matrix",
-        "",
-        "All cases use the same measured-aging-informed checkpoint and an independent synthetic dynamic profile.",
-        "",
-        "```json",
-        json.dumps(summary, indent=2),
-        "```",
-        "",
-    ]
-    path.write_text("\n".join(report), encoding="utf-8")
+    path.write_text("\n".join(report_lines(summary)), encoding="utf-8")
 
 
 def main() -> None:
