@@ -72,6 +72,70 @@ def voltage_model_diagnostics(model, profile):
     return full_state_voltage, conditioned_voltage
 
 
+def report_lines(metrics: dict) -> list[str]:
+    dataset = metrics["dataset"]
+    lines = [
+        "# CALCE Measured-Data Validation",
+        "",
+        "## Scope",
+        "",
+        (
+            "ECM identification uses CALCE DST data at nominal 80% SOC and 25 °C. "
+            "Independent SOC validation uses CALCE FUDS data at nominal 80% SOC and "
+            "25 °C."
+        ),
+        "",
+        "## Key Results",
+        "",
+        "| Quantity | Value |",
+        "|---|---:|",
+        f"| Measured initial capacity | {dataset['measured_capacity_ah']:.4f} Ah |",
+        f"| Reference initial SOC | {100 * dataset['reference_initial_soc']:.2f}% |",
+        f"| Estimator initial SOC | {100 * dataset['estimator_initial_soc']:.2f}% |",
+        (
+            "| Full-state open-loop voltage RMSE | "
+            f"{1000 * dataset['full_state_open_loop_voltage_rmse_v']:.2f} mV |"
+        ),
+        (
+            "| Reference-SOC-conditioned voltage RMSE | "
+            f"{1000 * dataset['reference_soc_conditioned_voltage_rmse_v']:.2f} mV |"
+        ),
+        "",
+        "| Method | SOC RMSE | SOC MAE | Max Error | Final Error | Runtime |",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
+    labels = {
+        "coulomb_counting": "Coulomb Counting",
+        "ekf": "EKF",
+        "ukf": "UKF",
+    }
+    for method in ("coulomb_counting", "ekf", "ukf"):
+        value = metrics[method]
+        lines.append(
+            f"| {labels[method]} | {value['rmse_pct']:.3f} %pt | "
+            f"{value['mae_pct']:.3f} %pt | {value['max_error_pct']:.3f} %pt | "
+            f"{value['final_error_pct']:.3f} %pt | "
+            f"{value['runtime_us_per_sample']:.2f} µs/sample |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Interpretation",
+            "",
+            (
+                "The SOC reference is constructed by integrating measured current from "
+                "the capacity-derived initial SOC. The full-state open-loop and "
+                "reference-SOC-conditioned voltage RMSE values are numerically equal in "
+                "this configuration because both recursions use the same initial SOC, "
+                "measured current, measured capacity, unit coulombic efficiency, and "
+                "clipping behavior; they remain separately reported because their "
+                "definitions differ."
+            ),
+        ]
+    )
+    return lines
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Identify on CALCE DST and validate SOC estimation on independent FUDS data"
@@ -227,41 +291,8 @@ def main() -> None:
     fig.savefig(figure_path, dpi=160)
     plt.close(fig)
 
-    lines = [
-        "# CALCE Measured-Data Validation",
-        "",
-        "Identification: DST 80% SOC at 25 C. Independent validation: FUDS 80% SOC at 25 C.",
-        "",
-        f"Measured initial capacity: {capacity_ah:.4f} Ah",
-        f"Reference initial SOC: {100 * fuds.initial_soc:.2f}%",
-        f"Estimator initial SOC: {100 * initial_soc:.2f}%",
-        (
-            "Independent FUDS full-state open-loop voltage RMSE: "
-            f"{1000 * full_state_open_loop_voltage_rmse:.2f} mV"
-        ),
-        (
-            "Independent FUDS reference-SOC-conditioned voltage RMSE: "
-            f"{1000 * reference_soc_conditioned_voltage_rmse:.2f} mV"
-        ),
-        "",
-        "| Method | SOC RMSE [%pt] | SOC MAE [%pt] | Max error [%pt] | Final error [%pt] | Runtime [us/sample] |",
-        "|---|---:|---:|---:|---:|---:|",
-    ]
-    for method in ("coulomb_counting", "ekf", "ukf"):
-        value = metrics[method]
-        lines.append(
-            f"| {method} | {value['rmse_pct']:.3f} | {value['mae_pct']:.3f} | {value['max_error_pct']:.3f} | "
-            f"{value['final_error_pct']:.3f} | {value['runtime_us_per_sample']:.2f} |"
-        )
-    lines.extend(
-        [
-            "",
-            "The SOC reference is constructed by integrating measured current from the capacity-derived initial SOC.",
-            "",
-        ]
-    )
     report_path = reports_dir / "calce_fuds_validation.md"
-    report_path.write_text("\n".join(lines), encoding="utf-8")
+    report_path.write_text("\n".join(report_lines(metrics)), encoding="utf-8")
     print(json.dumps(metrics, indent=2))
     print(f"Saved {metrics_path}")
     print(f"Saved {figure_path}")
