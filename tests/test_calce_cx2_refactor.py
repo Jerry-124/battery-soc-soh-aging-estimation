@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
+import pandas as pd
 import pytest
 
-from battery_estimation.data.calce_cx2 import _process_cycle
+from battery_estimation.data.calce_cx2 import aggregate_cx2_by_file, _process_cycle
 
 
 def _row(
@@ -59,3 +60,22 @@ def test_process_cycle_rejects_too_small_current_step() -> None:
     rows[-1]["Current(A)"] = -0.55
 
     assert _process_cycle(rows, "sample.xlsx") is None
+
+
+def test_aggregate_names_first_capacity_ratio_as_retention() -> None:
+    start = datetime(2026, 1, 1)  # noqa: DTZ001
+    records = pd.DataFrame(
+        {
+            "source_file": ["a.xlsx", "b.xlsx"],
+            "timestamp": [start, start + timedelta(days=1)],
+            "capacity_ah": [1.0, 0.8],
+            "rest_to_half_c_resistance_ohm": [0.10, 0.12],
+            "half_c_to_one_c_resistance_ohm": [0.08, 0.09],
+        }
+    )
+
+    aging = aggregate_cx2_by_file(records)
+
+    assert "capacity_retention_pct" in aging.columns
+    assert "capacity_soh_pct" not in aging.columns
+    assert aging["capacity_retention_pct"].tolist() == pytest.approx([100.0, 80.0])
