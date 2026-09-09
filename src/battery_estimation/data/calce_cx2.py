@@ -237,7 +237,7 @@ def aggregate_cx2_by_file(records: pd.DataFrame) -> pd.DataFrame:
     grouped["elapsed_days"] = (
         grouped["timestamp"] - grouped["timestamp"].iloc[0]
     ).dt.total_seconds() / 86400.0
-    grouped["capacity_soh_pct"] = (
+    grouped["capacity_retention_pct"] = (
         100.0 * grouped["capacity_ah"] / grouped["capacity_ah"].iloc[0]
     )
     grouped["resistance_factor"] = (

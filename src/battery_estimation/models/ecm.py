@@ -39,17 +39,26 @@ class ECMParameters:
     c2: float = 12000.0
 
     def __post_init__(self) -> None:
-        if self.capacity_ah <= 0.0:
-            raise ValueError("capacity_ah must be positive")
-        if not 0.0 < self.coulombic_efficiency <= 1.0:
-            raise ValueError("coulombic_efficiency must be in (0, 1]")
+        if not np.isfinite(self.capacity_ah) or self.capacity_ah <= 0.0:
+            raise ValueError("capacity_ah must be finite and positive")
+        if (
+            not np.isfinite(self.coulombic_efficiency)
+            or not 0.0 < self.coulombic_efficiency <= 1.0
+        ):
+            raise ValueError("coulombic_efficiency must be finite and in (0, 1]")
         for name in ("r0", "r1", "r2", "c1", "c2"):
-            if getattr(self, name) <= 0.0:
-                raise ValueError(f"{name} must be positive")
+            value = getattr(self, name)
+            if not np.isfinite(value) or value <= 0.0:
+                raise ValueError(f"{name} must be finite and positive")
 
     def aged(self, capacity_factor: float, resistance_factor: float) -> ECMParameters:
-        if capacity_factor <= 0.0 or resistance_factor <= 0.0:
-            raise ValueError("Aging factors must be positive")
+        if (
+            not np.isfinite(capacity_factor)
+            or not np.isfinite(resistance_factor)
+            or capacity_factor <= 0.0
+            or resistance_factor <= 0.0
+        ):
+            raise ValueError("Aging factors must be finite and positive")
         return replace(
             self,
             capacity_ah=self.capacity_ah * capacity_factor,

@@ -14,7 +14,7 @@
         "mae_pct": 2.6318566763114513,
         "max_error_pct": 15.000000000000002,
         "final_error_pct": 0.0,
-        "convergence_s": 190.0,
+        "first_within_2pct_s": 190.0,
         "post_300s_rmse_pct": 2.847897171598464
       },
       "ukf": {
@@ -22,7 +22,7 @@
         "mae_pct": 2.407897238744893,
         "max_error_pct": 15.000000000000002,
         "final_error_pct": 0.19172513092556046,
-        "convergence_s": 131.0,
+        "first_within_2pct_s": 131.0,
         "post_300s_rmse_pct": 2.679554070835902
       }
     },
@@ -32,7 +32,7 @@
         "mae_pct": 0.7893918254406431,
         "max_error_pct": 15.000000000000002,
         "final_error_pct": 0.016150744428482328,
-        "convergence_s": 1.0,
+        "first_within_2pct_s": 1.0,
         "post_300s_rmse_pct": 0.8362621176090305
       },
       "ukf": {
@@ -40,7 +40,7 @@
         "mae_pct": 0.2522014698278553,
         "max_error_pct": 15.000000000000002,
         "final_error_pct": 0.26277104668384493,
-        "convergence_s": 2.0,
+        "first_within_2pct_s": 2.0,
         "post_300s_rmse_pct": 0.27347661839720633
       }
     },
@@ -50,7 +50,7 @@
         "mae_pct": 0.8666394308629443,
         "max_error_pct": 15.000000000000002,
         "final_error_pct": 0.013883085182306293,
-        "convergence_s": 1.0,
+        "first_within_2pct_s": 1.0,
         "post_300s_rmse_pct": 0.9064834720841078
       },
       "ukf": {
@@ -58,7 +58,7 @@
         "mae_pct": 0.3667987370472447,
         "max_error_pct": 15.000000000000002,
         "final_error_pct": 0.40255091250557523,
-        "convergence_s": 2.0,
+        "first_within_2pct_s": 2.0,
         "post_300s_rmse_pct": 0.39942607207827974
       }
     }

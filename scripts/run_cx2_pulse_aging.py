@@ -30,6 +30,71 @@ def trailing_median(values: np.ndarray, window: int = 3) -> np.ndarray:
     )
 
 
+def output_directories(output_root: Path) -> dict[str, Path]:
+    """Return all CX2 artifacts under the requested output root."""
+    processed = (
+        ROOT / "data" / "processed"
+        if output_root.resolve() == (ROOT / "results").resolve()
+        else output_root / "data" / "processed"
+    )
+    return {
+        "metrics": output_root / "metrics",
+        "figures": output_root / "figures",
+        "reports": output_root / "reports",
+        "processed": processed,
+    }
+
+
+def report_lines(metrics: dict) -> list[str]:
+    measured = metrics["measured_health"]
+    checkpoint = metrics["observer_checkpoint"]
+    dataset = metrics["dataset"]
+    return [
+        "# CALCE CX2-3 Full-Life Pulse-Aging Validation",
+        "",
+        "## Scope",
+        "",
+        (
+            "The measured aging pipeline processes the full-life CALCE CX2-3 archive "
+            "and retains the complete degradation trajectory, including the abrupt "
+            "end-of-life region."
+        ),
+        "",
+        "## Key Results",
+        "",
+        "| Quantity | Value |",
+        "|---|---:|",
+        f"| Valid dated exports | {dataset['files_with_valid_cycles']} |",
+        f"| Sampled complete diagnostic cycles | {dataset['pulse_cycles_sampled']:,} |",
+        f"| Capacity-retention factor, first → last | 1.000 → {measured['final_capacity_factor']:.3f} |",
+        f"| 5 s pulse-resistance factor, first → last | 1.000× → {measured['final_resistance_factor']:.3f}× |",
+        (
+            "| Observer checkpoint capacity-retention factor, measured / estimated | "
+            f"{checkpoint['true_capacity_factor']:.3f} / "
+            f"{checkpoint['estimated_capacity_factor']:.3f} |"
+        ),
+        (
+            "| Observer checkpoint resistance factor, measured / estimated | "
+            f"{checkpoint['true_resistance_factor']:.3f}× / "
+            f"{checkpoint['estimated_resistance_factor']:.3f}× |"
+        ),
+        "",
+        "## Interpretation",
+        "",
+        (
+            "Capacity is normalized to the first measured diagnostic value. Pulse "
+            "resistance uses the voltage change from the end of a 10-second rest to "
+            "the first 5-second sample of the 0.5C discharge pulse, divided by the "
+            "measured current step."
+        ),
+        "",
+        (
+            "The observer checkpoint is selected near a 0.70 capacity-retention "
+            "factor; this ratio is not re-labeled as rated-capacity SOH."
+        ),
+    ]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Extract full-life 5-second pulse resistance and capacity fade from CALCE CX2-3"
@@ -43,21 +108,22 @@ def main() -> None:
     parser.add_argument(
         "--reuse-records",
         action="store_true",
-        help="Reuse data/processed/cx2_pulse_records.csv",
+        help="Reuse the processed cx2_pulse_records.csv for this output root",
     )
     parser.add_argument("--output-root", type=Path, default=ROOT / "results")
     args = parser.parse_args()
-    cached_records = ROOT / "data" / "processed" / "cx2_pulse_records.csv"
+    directories = output_directories(args.output_root)
+    cached_records = directories["processed"] / "cx2_pulse_records.csv"
     if args.reuse_records and cached_records.exists():
         records = pd.read_csv(cached_records, parse_dates=["timestamp"])
     else:
         records = extract_cx2_pulse_records(args.archive, args.max_cycles_per_file)
     aging = aggregate_cx2_by_file(records)
-    cap_estimate = trailing_median(aging["capacity_soh_pct"].to_numpy())
+    cap_estimate = trailing_median(aging["capacity_retention_pct"].to_numpy())
     resistance_estimate = trailing_median(aging["resistance_factor"].to_numpy())
-    operational = aging[aging["capacity_soh_pct"].between(65.0, 75.0)]
-    target_index = int((operational["capacity_soh_pct"] - 70.0).abs().idxmin())
-    true_capacity_factor = float(aging["capacity_soh_pct"].iloc[-1] / 100.0)
+    operational = aging[aging["capacity_retention_pct"].between(65.0, 75.0)]
+    target_index = int((operational["capacity_retention_pct"] - 70.0).abs().idxmin())
+    true_capacity_factor = float(aging["capacity_retention_pct"].iloc[-1] / 100.0)
     true_resistance_factor = float(aging["resistance_factor"].iloc[-1])
     metrics = {
         "dataset": {
@@ -83,9 +149,11 @@ def main() -> None:
         },
         "estimated_health": {
             "method": "causal trailing median of 3 diagnostic checkpoints",
-            "capacity_rmse_pct": float(
+            "capacity_retention_rmse_pct": float(
                 np.sqrt(
-                    np.mean((cap_estimate - aging["capacity_soh_pct"].to_numpy()) ** 2)
+                    np.mean(
+                        (cap_estimate - aging["capacity_retention_pct"].to_numpy()) ** 2
+                    )
                 )
             ),
             "resistance_factor_rmse": float(
@@ -100,7 +168,7 @@ def main() -> None:
         "observer_checkpoint": {
             "timestamp": aging.loc[target_index, "timestamp"].isoformat(),
             "true_capacity_factor": float(
-                aging.loc[target_index, "capacity_soh_pct"] / 100.0
+                aging.loc[target_index, "capacity_retention_pct"] / 100.0
             ),
             "true_resistance_factor": float(
                 aging.loc[target_index, "resistance_factor"]
@@ -109,24 +177,20 @@ def main() -> None:
             "estimated_resistance_factor": float(resistance_estimate[target_index]),
         },
     }
-    metrics_dir = args.output_root / "metrics"
-    figures_dir = args.output_root / "figures"
-    reports_dir = args.output_root / "reports"
-    processed_dir = ROOT / "data" / "processed"
-    for directory in (metrics_dir, figures_dir, reports_dir, processed_dir):
+    for directory in directories.values():
         directory.mkdir(parents=True, exist_ok=True)
-    metrics_path = metrics_dir / "cx2_pulse_aging.json"
+    metrics_path = directories["metrics"] / "cx2_pulse_aging.json"
     metrics_path.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
     aging.assign(
-        capacity_soh_estimate_pct=cap_estimate,
+        capacity_retention_estimate_pct=cap_estimate,
         resistance_factor_estimate=resistance_estimate,
-    ).to_csv(processed_dir / "cx2_pulse_aging.csv", index=False)
-    records.to_csv(processed_dir / "cx2_pulse_records.csv", index=False)
+    ).to_csv(directories["processed"] / "cx2_pulse_aging.csv", index=False)
+    records.to_csv(directories["processed"] / "cx2_pulse_records.csv", index=False)
 
     fig, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
     axes[0].plot(
         aging["elapsed_days"],
-        aging["capacity_soh_pct"],
+        aging["capacity_retention_pct"],
         "o-",
         ms=3,
         label="Measured median",
@@ -134,7 +198,7 @@ def main() -> None:
     axes[0].plot(
         aging["elapsed_days"], cap_estimate, "--", label="Causal 3-checkpoint estimate"
     )
-    axes[0].set_ylabel("Capacity SOH [%]")
+    axes[0].set_ylabel("Capacity retention [% of initial]")
     axes[0].grid(alpha=0.25)
     axes[0].legend()
     axes[1].plot(
@@ -155,29 +219,18 @@ def main() -> None:
     axes[1].grid(alpha=0.25)
     axes[1].legend()
     fig.suptitle(
-        "CALCE CX2-3 measured capacity fade and 5-second pulse resistance growth"
+        "CALCE CX2-3 measured capacity retention and 5-second pulse resistance growth"
     )
     fig.tight_layout()
-    figure_path = figures_dir / "cx2_pulse_aging.png"
+    figure_path = directories["figures"] / "cx2_pulse_aging.png"
     fig.savefig(figure_path, dpi=160)
     plt.close(fig)
-    report = [
-        "# CALCE CX2-3 Pulse Aging Validation",
-        "",
-        f"- Valid date exports: {len(aging)}",
-        f"- Sampled complete pulse cycles: {len(records)}",
-        f"- Capacity factor, first to last: 1.000 to {true_capacity_factor:.3f}",
-        f"- 5 s pulse resistance factor, first to last: 1.000 to {true_resistance_factor:.3f}",
-        f"- Observer checkpoint capacity factor (true / estimated): {metrics['observer_checkpoint']['true_capacity_factor']:.3f} / {metrics['observer_checkpoint']['estimated_capacity_factor']:.3f}",
-        f"- Observer checkpoint resistance factor (true / estimated): {metrics['observer_checkpoint']['true_resistance_factor']:.3f} / {metrics['observer_checkpoint']['estimated_resistance_factor']:.3f}",
-        "",
-        "Pulse resistance uses the voltage change from a 10-second rest to the first 5-second sample of the 0.5C discharge pulse.",
-        "",
-    ]
-    (reports_dir / "cx2_pulse_aging.md").write_text("\n".join(report), encoding="utf-8")
+    report_path = directories["reports"] / "cx2_pulse_aging.md"
+    report_path.write_text("\n".join(report_lines(metrics)), encoding="utf-8")
     print(json.dumps(metrics, indent=2))
     print(f"Saved {metrics_path}")
     print(f"Saved {figure_path}")
+    print(f"Saved {report_path}")
 
 
 if __name__ == "__main__":

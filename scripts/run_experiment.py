@@ -100,7 +100,6 @@ def main() -> None:
         current_noise_std_a=float(config["current_noise_std_a"]),
         current_bias_a=float(config["current_bias_a"]),
         seed=int(config["seed"]),
-        resistance_factor=float(aging["resistance_factor"]),
     )
     observer_params = reference
     if config["observer"]["use_aging_adaptation"]:

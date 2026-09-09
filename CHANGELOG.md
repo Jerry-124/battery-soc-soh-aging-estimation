@@ -2,6 +2,32 @@
 
 Notable stable releases are documented below. Historical results are preserved as they were reported for each release; later corrections are not retroactively substituted into earlier entries.
 
+## [1.1.2] - 2026-09-09
+
+### Summary
+
+Reproducibility and terminology-consistency patch for report generation, CX2 capacity semantics, metric naming, and defensive validation.
+
+### Changes
+
+- Updated all public Markdown report generators to reproduce the structured `Scope / Key Results / Interpretation` reports committed in the repository.
+- Renamed CALCE CX2-3 first-diagnostic-normalized capacity from `capacity_soh_pct` to `capacity_retention_pct`, including the processed CSV schema, estimator field names, plotting labels, tests, and documentation.
+- Replaced the ambiguous `convergence_s` metric with `first_within_2pct_s`, defined as the first sample whose absolute SOC error is no greater than two percentage points.
+- Added finite-value validation for ECM parameters, aging factors, and synthetic experiment inputs.
+- Removed the metadata-only `resistance_factor` argument and field from the synthetic dataset API; resistance aging remains represented explicitly in the supplied ECM parameters.
+- Isolated CALCE CX2-3 processed artifacts under custom `--output-root` directories while preserving the repository's default curated-data location.
+- Updated committed metric artifacts and the synthetic benchmark report to the corrected field names without changing numerical benchmark values.
+
+### Validation
+
+- Automated suite expanded from 31 to 34 tests.
+- Added regression coverage for CX2 capacity-retention naming, CX2 custom-output isolation, and public report-generator structure.
+- Existing numerical SOC, SOH, aging, and robustness results are unchanged; no estimator retuning was required.
+
+### Scope
+
+This patch closes reproducibility and naming inconsistencies discovered after `v1.1.1`. It does not expand the scientific scope or rewrite historical release results.
+
 ## [1.1.1] - 2026-09-09
 
 ### Summary

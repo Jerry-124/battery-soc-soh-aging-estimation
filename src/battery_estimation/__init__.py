@@ -3,4 +3,4 @@
 from .models.ecm import ECMParameters, SecondOrderThevenin
 
 __all__ = ["ECMParameters", "SecondOrderThevenin"]
-__version__ = "1.1.1"
+__version__ = "1.1.2"

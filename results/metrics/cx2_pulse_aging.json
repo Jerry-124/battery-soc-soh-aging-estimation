@@ -18,7 +18,7 @@
   },
   "estimated_health": {
     "method": "causal trailing median of 3 diagnostic checkpoints",
-    "capacity_rmse_pct": 5.568928665144077,
+    "capacity_retention_rmse_pct": 5.568928665144077,
     "resistance_factor_rmse": 0.27205896715219746
   },
   "observer_checkpoint": {

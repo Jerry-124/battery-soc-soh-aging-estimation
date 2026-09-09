@@ -47,29 +47,48 @@ class TestECM(unittest.TestCase):
     def test_invalid_physical_parameters_are_rejected(self):
         invalid_cases = (
             {"capacity_ah": 0.0},
+            {"capacity_ah": np.nan},
             {"coulombic_efficiency": 0.0},
             {"coulombic_efficiency": 1.01},
+            {"coulombic_efficiency": np.inf},
             {"r0": 0.0},
+            {"r0": np.nan},
             {"r1": -0.01},
             {"c1": 0.0},
             {"r2": -0.01},
-            {"c2": 0.0},
+            {"c2": np.inf},
         )
         for values in invalid_cases:
             with self.subTest(values=values), self.assertRaises(ValueError):
                 ECMParameters(**values)
-        with self.assertRaises(ValueError):
-            ECMParameters().aged(0.0, 1.0)
+        for capacity_factor, resistance_factor in (
+            (0.0, 1.0),
+            (np.nan, 1.0),
+            (1.0, np.inf),
+        ):
+            with (
+                self.subTest(
+                    capacity_factor=capacity_factor,
+                    resistance_factor=resistance_factor,
+                ),
+                self.assertRaises(ValueError),
+            ):
+                ECMParameters().aged(capacity_factor, resistance_factor)
 
     def test_invalid_synthetic_inputs_are_rejected(self):
         params = ECMParameters()
         invalid_cases = (
             {"dt_s": 0.0},
+            {"dt_s": np.nan},
             {"duration_s": 0.0},
+            {"duration_s": np.inf},
             {"initial_soc": 1.1},
+            {"initial_soc": np.nan},
             {"voltage_noise_std_v": -0.001},
+            {"voltage_noise_std_v": np.nan},
             {"current_noise_std_a": -0.001},
-            {"resistance_factor": 0.0},
+            {"current_noise_std_a": np.inf},
+            {"current_bias_a": np.nan},
         )
         defaults = {
             "params": params,
@@ -80,7 +99,6 @@ class TestECM(unittest.TestCase):
             "current_noise_std_a": 0.0,
             "current_bias_a": 0.0,
             "seed": 1,
-            "resistance_factor": 1.0,
         }
         for override in invalid_cases:
             with self.subTest(override=override), self.assertRaises(ValueError):
@@ -116,7 +134,7 @@ class TestHealth(unittest.TestCase):
 class TestMetrics(unittest.TestCase):
     def test_non_converged_result_is_json_safe(self):
         metrics = calculate_metrics(np.ones(5), np.zeros(5), 1.0)
-        self.assertIsNone(metrics["convergence_s"])
+        self.assertIsNone(metrics["first_within_2pct_s"])
 
 
 class TestMeasuredDataSupport(unittest.TestCase):

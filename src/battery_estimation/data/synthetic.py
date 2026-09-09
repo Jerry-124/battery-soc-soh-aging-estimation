@@ -15,7 +15,6 @@ class SyntheticDataset:
     true_soc: np.ndarray
     clean_voltage_v: np.ndarray
     capacity_ah: float
-    resistance_factor: float
 
 
 def generate_dynamic_current(n_steps: int, dt_s: float, seed: int) -> np.ndarray:
@@ -48,16 +47,24 @@ def simulate_dataset(
     current_noise_std_a: float,
     current_bias_a: float,
     seed: int,
-    resistance_factor: float = 1.0,
 ) -> SyntheticDataset:
+    finite_values = {
+        "dt_s": dt_s,
+        "duration_s": duration_s,
+        "initial_soc": initial_soc,
+        "voltage_noise_std_v": voltage_noise_std_v,
+        "current_noise_std_a": current_noise_std_a,
+        "current_bias_a": current_bias_a,
+    }
+    for name, value in finite_values.items():
+        if not np.isfinite(value):
+            raise ValueError(f"{name} must be finite")
     if dt_s <= 0.0 or duration_s <= 0.0:
         raise ValueError("dt_s and duration_s must be positive")
     if not 0.0 <= initial_soc <= 1.0:
         raise ValueError("initial_soc must be in [0, 1]")
     if voltage_noise_std_v < 0.0 or current_noise_std_a < 0.0:
         raise ValueError("Noise standard deviations must be non-negative")
-    if resistance_factor <= 0.0:
-        raise ValueError("resistance_factor must be positive")
 
     n_steps = int(duration_s / dt_s) + 1
     rng = np.random.default_rng(seed)
@@ -82,5 +89,4 @@ def simulate_dataset(
         true_soc=soc,
         clean_voltage_v=clean_voltage,
         capacity_ah=params.capacity_ah,
-        resistance_factor=resistance_factor,
     )
