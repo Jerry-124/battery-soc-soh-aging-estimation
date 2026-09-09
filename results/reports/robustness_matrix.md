@@ -1,38 +1,17 @@
-# Robustness matrix
+# Robustness Matrix
 
-All cases use the same measured-aging-informed checkpoint and an independent synthetic dynamic profile.
+## Scope
 
-```json
-{
-  "initial_soc_error": {
-    "ekf": {
-      "mean_post_300s_rmse_pct": 0.8440144247855207,
-      "worst_post_300s_rmse_pct": 1.5238453894029562
-    },
-    "ukf": {
-      "mean_post_300s_rmse_pct": 0.6590884984035495,
-      "worst_post_300s_rmse_pct": 0.9686070436580729
-    }
-  },
-  "measurement_noise": {
-    "ekf": {
-      "mean_post_300s_rmse_pct": 0.992194902829016,
-      "worst_post_300s_rmse_pct": 1.4453615691115314
-    },
-    "ukf": {
-      "mean_post_300s_rmse_pct": 0.6128401248351556,
-      "worst_post_300s_rmse_pct": 0.7012499453231809
-    }
-  },
-  "parameter_uncertainty": {
-    "ekf": {
-      "mean_post_300s_rmse_pct": 3.3443432806333493,
-      "worst_post_300s_rmse_pct": 8.349603000438991
-    },
-    "ukf": {
-      "mean_post_300s_rmse_pct": 3.6309347055653776,
-      "worst_post_300s_rmse_pct": 8.94437087024956
-    }
-  }
-}
-```
+All cases use the same measured-aging-informed checkpoint and an independent synthetic dynamic profile. Each uncertainty family is varied separately.
+
+## Key Results
+
+| Uncertainty Family | EKF Mean Post-300 s RMSE | EKF Worst Post-300 s RMSE | UKF Mean Post-300 s RMSE | UKF Worst Post-300 s RMSE |
+|---|---:|---:|---:|---:|
+| Initial SOC error | 0.844 %pt | 1.524 %pt | 0.659 %pt | 0.969 %pt |
+| Measurement noise | 0.992 %pt | 1.445 %pt | 0.613 %pt | 0.701 %pt |
+| Parameter uncertainty | 3.344 %pt | 8.350 %pt | 3.631 %pt | 8.944 %pt |
+
+## Interpretation
+
+Initial-SOC and measurement-noise perturbations remain comparatively well controlled after convergence. Parameter uncertainty is substantially more damaging and is intentionally retained in the benchmark because it quantifies the motivation for better identification and aging-aware adaptation.

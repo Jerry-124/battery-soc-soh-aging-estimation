@@ -1,10 +1,22 @@
-# CALCE CX2-3 Pulse Aging Validation
+# CALCE CX2-3 Full-Life Pulse-Aging Validation
 
-- Valid date exports: 61
-- Sampled complete pulse cycles: 1185
-- Capacity factor, first to last: 1.000 to 0.016
-- 5 s pulse resistance factor, first to last: 1.000 to 5.001
-- Observer checkpoint capacity factor (true / estimated): 0.695 / 0.706
-- Observer checkpoint resistance factor (true / estimated): 1.319 / 1.300
+## Scope
 
-Pulse resistance uses the voltage change from a 10-second rest to the first 5-second sample of the 0.5C discharge pulse.
+The measured aging pipeline processes the full-life CALCE CX2-3 archive and retains the complete degradation trajectory, including the abrupt end-of-life region.
+
+## Key Results
+
+| Quantity | Value |
+|---|---:|
+| Valid dated exports | 61 |
+| Sampled complete diagnostic cycles | 1,185 |
+| Capacity-retention factor, first → last | 1.000 → 0.016 |
+| 5 s pulse-resistance factor, first → last | 1.000× → 5.001× |
+| Observer checkpoint capacity-retention factor, measured / estimated | 0.695 / 0.706 |
+| Observer checkpoint resistance factor, measured / estimated | 1.319× / 1.300× |
+
+## Interpretation
+
+Capacity is normalized to the first measured diagnostic value. Pulse resistance uses the voltage change from the end of a 10-second rest to the first 5-second sample of the 0.5C discharge pulse, divided by the measured current step.
+
+The observer checkpoint is selected near a 0.70 capacity-retention factor; this ratio is not re-labeled as rated-capacity SOH.

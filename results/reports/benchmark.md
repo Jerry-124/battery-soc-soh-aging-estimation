@@ -1,15 +1,23 @@
-# Synthetic Benchmark Report
+# Synthetic SOC Benchmark
 
-> These results use generated data and validate the software pipeline; they are not experimental cell claims.
+## Scope
 
-| Experiment | Method | SOC RMSE [%pt] | SOC MAE [%pt] | Max error [%pt] | Convergence [s] | Runtime [us/sample] |
+These results use generated data to validate the estimator pipeline and controlled aging-mismatch scenarios. They are not experimental-cell performance claims.
+
+## Key Results
+
+| Scenario | Method | SOC RMSE | SOC MAE | Max Error | Convergence | Runtime |
 |---|---|---:|---:|---:|---:|---:|
-| synthetic_aged_fixed_benchmark | coulomb_counting | 7.318 | 6.572 | 12.000 | 3245.0 | 4.62 |
-| synthetic_aged_fixed_benchmark | ekf | 2.393 | 2.274 | 12.000 | 1.0 | 74.98 |
-| synthetic_aged_fixed_benchmark | ukf | 2.339 | 2.214 | 12.000 | 2.0 | 213.48 |
-| synthetic_aging_aware_benchmark | coulomb_counting | 12.039 | 12.039 | 12.091 | N/A | 5.21 |
-| synthetic_aging_aware_benchmark | ekf | 1.258 | 0.718 | 12.000 | 1.0 | 73.49 |
-| synthetic_aging_aware_benchmark | ukf | 0.267 | 0.104 | 12.000 | 2.0 | 225.06 |
-| synthetic_soc_benchmark | coulomb_counting | 12.059 | 12.059 | 12.106 | N/A | 4.28 |
-| synthetic_soc_benchmark | ekf | 0.712 | 0.289 | 12.000 | 1.0 | 73.63 |
-| synthetic_soc_benchmark | ukf | 0.250 | 0.065 | 12.000 | 2.0 | 217.61 |
+| Aged, fixed parameters | Coulomb Counting | 7.318 %pt | 6.572 %pt | 12.000 %pt | 3245 s | 4.62 µs/sample |
+| Aged, fixed parameters | EKF | 2.393 %pt | 2.274 %pt | 12.000 %pt | 1 s | 74.98 µs/sample |
+| Aged, fixed parameters | UKF | 2.339 %pt | 2.214 %pt | 12.000 %pt | 2 s | 213.48 µs/sample |
+| Aged, adapted parameters | Coulomb Counting | 12.039 %pt | 12.039 %pt | 12.091 %pt | N/A | 5.21 µs/sample |
+| Aged, adapted parameters | EKF | 1.258 %pt | 0.718 %pt | 12.000 %pt | 1 s | 73.49 µs/sample |
+| Aged, adapted parameters | UKF | 0.267 %pt | 0.104 %pt | 12.000 %pt | 2 s | 225.06 µs/sample |
+| Nominal | Coulomb Counting | 12.059 %pt | 12.059 %pt | 12.106 %pt | N/A | 4.28 µs/sample |
+| Nominal | EKF | 0.712 %pt | 0.289 %pt | 12.000 %pt | 1 s | 73.63 µs/sample |
+| Nominal | UKF | 0.250 %pt | 0.065 %pt | 12.000 %pt | 2 s | 217.61 µs/sample |
+
+## Interpretation
+
+The synthetic benchmark isolates estimator behavior under controlled initial-SOC error and parameter mismatch. Measured-data validation is reported separately for CALCE and Oxford datasets.
