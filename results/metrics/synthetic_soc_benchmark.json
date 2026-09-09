@@ -4,7 +4,7 @@
     "mae_pct": 12.058831287399338,
     "max_error_pct": 12.105951584353086,
     "final_error_pct": -12.105840328365463,
-    "convergence_s": null,
+    "first_within_2pct_s": null,
     "runtime_us_per_sample": 4.282254928944623
   },
   "ekf": {
@@ -12,7 +12,7 @@
     "mae_pct": 0.28874527589354626,
     "max_error_pct": 12.0,
     "final_error_pct": 0.0034010613393531397,
-    "convergence_s": 1.0,
+    "first_within_2pct_s": 1.0,
     "runtime_us_per_sample": 73.62915856498108
   },
   "ukf": {
@@ -20,7 +20,7 @@
     "mae_pct": 0.06542483955783829,
     "max_error_pct": 12.0,
     "final_error_pct": 0.004890318719219522,
-    "convergence_s": 2.0,
+    "first_within_2pct_s": 2.0,
     "runtime_us_per_sample": 217.61024715460997
   },
   "health": {
