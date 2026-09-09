@@ -1,14 +1,14 @@
 # Battery SOC/SOH Estimation with EKF/UKF and Aging-Aware Modeling
 
-[![Version](https://img.shields.io/badge/version-v1.1.0-blueviolet)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v1.1.1-blueviolet)](CHANGELOG.md)
 [![Status](https://img.shields.io/badge/status-measured--data%20validation-green)](#status)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](#quick-start)
 [![CI](https://github.com/Jerry-124/battery-soc-soh-aging-estimation/actions/workflows/ci.yml/badge.svg)](https://github.com/Jerry-124/battery-soc-soh-aging-estimation/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-27-brightgreen)](#verification)
+[![Tests](https://img.shields.io/badge/tests-31-brightgreen)](#verification)
 
 `battery-soc-soh-aging-estimation` is a reproducible Battery Management System (BMS) project for lithium-ion battery modeling, State of Charge (SOC) estimation, State of Health (SOH) tracking, and aging-aware observer adaptation.
 
-The current **V1.1.0** portfolio release implements:
+The current **V1.1.1** portfolio release implements:
 
 - a discrete second-order Thevenin equivalent circuit model (2-RC ECM);
 - a nonlinear, monotonic synthetic OCV-SOC relationship and analytical derivative;
@@ -169,19 +169,20 @@ Identified 2-RC parameters:
 | $R_2$ | 0.03123 ohm |
 | $C_2$ | 5040.22 F |
 | DST identification voltage RMSE | 26.31 mV |
-| Independent FUDS open-loop voltage RMSE | 22.38 mV |
+| Independent FUDS full-state open-loop voltage RMSE | 22.38 mV |
+| Independent FUDS reference-SOC-conditioned voltage RMSE | 22.38 mV |
 
-Independent FUDS SOC results:
+Independent FUDS SOC results after applying the exact piecewise-linear OCV Jacobian:
 
 ![Independent CALCE FUDS validation](results/figures/calce_fuds_validation.png)
 
 | Method | RMSE [%pt] | MAE [%pt] | Maximum error [%pt] | Final error [%pt] |
 |---|---:|---:|---:|---:|
 | Coulomb Counting | 9.648 | 9.533 | 10.000 | -1.558 |
-| EKF | 0.731 | 0.598 | 10.000 | -1.558 |
+| EKF | 0.740 | 0.617 | 10.000 | -0.882 |
 | UKF | 0.849 | 0.717 | 10.000 | -0.856 |
 
-The EKF provides the best full-profile accuracy in this measured test. Cell-specific OCV characterization and temperature/cell-variation testing remain important extensions.
+The EKF provides the best full-profile accuracy in this measured test. Its corrected RMSE is 0.740 %pt versus the legacy 0.731 %pt result, a small change that does not alter the conclusion. The two voltage diagnostics are numerically equal here because the reference SOC and full-state SOC use the same initial value, measured current, measured capacity, unit coulombic efficiency, and clipping recursion; they remain separately reported because their definitions differ. Cell-specific OCV characterization and temperature/cell-variation testing remain important extensions.
 
 ## Oxford Measured SOH and Aging Validation
 
@@ -193,20 +194,22 @@ SOH and resistance-growth validation uses [Oxford Battery Degradation Dataset 1]
 - 1C and pseudo-OCV characterization every 100 cycles;
 - up to approximately 8,200 equivalent full cycles.
 
-Capacity SOH is calculated from each measured 1C discharge characterization. Effective resistance is estimated from the voltage difference between aligned 1C and pseudo-OCV discharge curves over 20-80% depth of discharge.
+Capacity retention is calculated relative to each cell's first measured 1C discharge capacity. Rated-capacity SOH uses the datasheet denominator, `capacity_mAh / 740 mAh * 100`. Effective resistance is estimated from the voltage difference between aligned 1C and pseudo-OCV discharge curves over 20-80% depth of discharge.
 
 | Measured aging result | Value |
 |---|---:|
 | Mean initial capacity | 733.44 mAh |
 | Initial capacity standard deviation | 3.51 mAh |
-| Mean final capacity SOH | 75.50% |
-| Final capacity SOH range | 62.03-79.97% |
+| Mean final capacity retention | 75.50% of initial measured capacity |
+| Final capacity retention range | 62.03-79.97% |
+| Mean final rated-capacity SOH | 74.82% of 740 mAh |
+| Final rated-capacity SOH range | 61.64-78.76% |
 | Mean initial effective resistance | 0.04635 ohm |
 | Mean final resistance factor | 1.704x |
 
 A simple aging-trend benchmark trains on the first 60% of each cell's characterization points and evaluates on the remaining 40%:
 
-| Capacity-SOH trend model | Holdout RMSE [%pt] | Holdout MAE [%pt] |
+| Capacity-retention trend model | Holdout RMSE [%pt] | Holdout MAE [%pt] |
 |---|---:|---:|
 | Linear | 2.847 | 2.266 |
 | Quadratic | 1.908 | 0.896 |
@@ -387,9 +390,12 @@ The current test suite covers:
 - HTTPS/host allow-list and redirect-host download security;
 - physical validation of ECM and synthetic experiment inputs;
 - experiment-output isolation;
-- robustness-matrix aggregation and indexing.
+- robustness-matrix aggregation and indexing;
+- exact piecewise-linear CALCE OCV derivative semantics with no artificial slope floor;
+- full-state open-loop versus reference-SOC-conditioned CALCE voltage diagnostics;
+- Oxford capacity-retention versus rated-capacity-SOH denominator semantics.
 
-The suite currently contains **27 pytest tests**. GitHub Actions runs compile checks, the full pytest suite, dependency consistency checks, and Ruff on Python 3.10 and 3.12.
+The suite currently contains **31 pytest tests**. GitHub Actions runs compile checks, the full pytest suite, dependency consistency checks, and Ruff on Python 3.10 and 3.12.
 
 ## Development Roadmap
 
@@ -413,6 +419,7 @@ The suite currently contains **27 pytest tests**. GitHub Actions runs compile ch
 - [x] Add persistent-convergence and post-convergence metrics
 - [x] Add continuous integration
 - [x] Add physical input validation and redirect-host download hardening
+- [x] Correct CALCE validation definitions and Oxford capacity denominator semantics
 - [ ] Identify SOC-dependent ECM parameter tables from multiple measured SOC windows
 - [ ] Separate identification, validation, and test cells/cycles
 - [ ] Add temperature-dependent parameter maps
@@ -429,7 +436,7 @@ Pack balancing, electro-thermal gradients, fault diagnosis, embedded deployment,
 
 ## Status
 
-**V1.1.0 portfolio baseline: working synthetic, measured-data, and semi-empirical aging-aware validation pipeline.** The project identifies the ECM on CALCE DST data, validates SOC estimation on independent CALCE FUDS data, extracts capacity fade and pulse-resistance growth from CALCE CX2-3 and Oxford aging data, feeds measured health estimates back into EKF/UKF observers, and runs three robustness matrices. The current release also validates physical model/experiment inputs and hardens dataset downloads against unexpected redirect hosts. Remaining work focuses on multiple temperatures, cross-cell SOC robustness, and joint online SOC-SOH estimation during ordinary dynamic operation.
+**V1.1.1 portfolio patch: working synthetic, measured-data, and semi-empirical aging-aware validation pipeline with corrected scientific semantics.** The project identifies the ECM on CALCE DST data, validates SOC estimation on independent CALCE FUDS data, extracts capacity fade and pulse-resistance growth from CALCE CX2-3 and Oxford aging data, feeds measured health estimates back into EKF/UKF observers, and runs three robustness matrices. V1.1.1 separates true full-state open-loop voltage validation from reference-SOC-conditioned diagnostics, aligns the EKF Jacobian with the piecewise-linear CALCE OCV curve, and distinguishes Oxford first-characterization retention from rated-capacity SOH. Remaining work focuses on multiple temperatures, cross-cell SOC robustness, and joint online SOC-SOH estimation during ordinary dynamic operation.
 
 ## License
 

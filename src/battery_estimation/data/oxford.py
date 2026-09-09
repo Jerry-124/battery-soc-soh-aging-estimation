@@ -13,7 +13,8 @@ class OxfordHealthTrajectory:
     cell: str
     cycle: np.ndarray
     capacity_mah: np.ndarray
-    capacity_soh_pct: np.ndarray
+    capacity_retention_pct: np.ndarray
+    rated_capacity_soh_pct: np.ndarray
     effective_resistance_ohm: np.ndarray
     resistance_soh_pct: np.ndarray
 
@@ -107,14 +108,16 @@ def load_oxford_health_trajectory(
     cycle = np.asarray(cycles, dtype=int)[order]
     capacity_mah = np.asarray(capacities, dtype=float)[order]
     resistance = np.asarray(resistances, dtype=float)[order]
-    capacity_soh = 100.0 * capacity_mah / capacity_mah[0]
+    capacity_retention = 100.0 * capacity_mah / capacity_mah[0]
+    rated_capacity_soh = 100.0 * capacity_mah / 740.0
     first_valid_resistance = resistance[np.isfinite(resistance)][0]
     resistance_soh = 100.0 * first_valid_resistance / resistance
     return OxfordHealthTrajectory(
         cell=cell_name,
         cycle=cycle,
         capacity_mah=capacity_mah,
-        capacity_soh_pct=capacity_soh,
+        capacity_retention_pct=capacity_retention,
+        rated_capacity_soh_pct=rated_capacity_soh,
         effective_resistance_ohm=resistance,
         resistance_soh_pct=resistance_soh,
     )
