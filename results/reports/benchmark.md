@@ -6,7 +6,7 @@ These results use generated data to validate the estimator pipeline and controll
 
 ## Key Results
 
-| Scenario | Method | SOC RMSE | SOC MAE | Max Error | Convergence | Runtime |
+| Scenario | Method | SOC RMSE | SOC MAE | Max Error | First Within ±2 %pt | Runtime |
 |---|---|---:|---:|---:|---:|---:|
 | Aged, fixed parameters | Coulomb Counting | 7.318 %pt | 6.572 %pt | 12.000 %pt | 3245 s | 4.62 µs/sample |
 | Aged, fixed parameters | EKF | 2.393 %pt | 2.274 %pt | 12.000 %pt | 1 s | 74.98 µs/sample |
@@ -20,4 +20,4 @@ These results use generated data to validate the estimator pipeline and controll
 
 ## Interpretation
 
-The synthetic benchmark isolates estimator behavior under controlled initial-SOC error and parameter mismatch. Measured-data validation is reported separately for CALCE and Oxford datasets.
+The synthetic benchmark isolates estimator behavior under controlled initial-SOC error and parameter mismatch. `First Within ±2 %pt` is the first sample at which absolute SOC error is no greater than two percentage points; it is not a persistent-convergence guarantee. Measured-data validation is reported separately for CALCE and Oxford datasets.
