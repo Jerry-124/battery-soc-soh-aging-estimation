@@ -19,7 +19,6 @@ from battery_estimation.health import (
     run_kalman_observers,
 )
 
-
 CASE_LABELS = {
     "fresh_fixed": "Fresh fixed",
     "aged_fixed_oracle": "Aged fixed (oracle)",

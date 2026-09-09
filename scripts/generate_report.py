@@ -4,7 +4,6 @@ import argparse
 import json
 from pathlib import Path
 
-
 SCENARIO_LABELS = {
     "synthetic_aged_fixed_benchmark": "Aged, fixed parameters",
     "synthetic_aging_aware_benchmark": "Aged, adapted parameters",

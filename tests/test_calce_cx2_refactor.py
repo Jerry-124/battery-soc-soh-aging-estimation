@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import pytest
 
-from battery_estimation.data.calce_cx2 import aggregate_cx2_by_file, _process_cycle
+from battery_estimation.data.calce_cx2 import _process_cycle, aggregate_cx2_by_file
 
 
 def _row(
